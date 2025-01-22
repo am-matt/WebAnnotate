@@ -1,0 +1,24 @@
+{
+    "manifest_version": 2,
+    "name": "WebAnnotate",
+    "version": "1.0",
+  
+    "description": "Draw and highlight on webpages.",
+    "homepage_url": "https://github.com/am-matt/WebAnnotate",
+    "icons": {
+      "48": "icons/pen-48.png"
+    },
+  
+    "permissions": ["activeTab"],
+  
+    "browser_action": {
+      "default_icon": "icons/pen-48.png",
+      "default_title": "WebAnnotate"
+    },
+
+    "background": {
+        "scripts": ["content_scripts/annotate.js"],
+        "persistent": false,
+        "type": "module"
+    }
+  }
