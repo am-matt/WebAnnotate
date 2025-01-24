@@ -9,16 +9,15 @@
       "48": "icons/pen-48.png"
     },
   
-    "permissions": ["activeTab"],
+    "permissions": ["activeTab","tabs","scripting"],
   
     "browser_action": {
       "default_icon": "icons/pen-48.png",
-      "default_title": "WebAnnotate"
+      "default_title": "WebAnnotate",
+      "default_popup": "popup/popup.html"
     },
 
     "background": {
-        "scripts": ["content_scripts/annotate.js"],
-        "persistent": false,
-        "type": "module"
+      "scripts": ["/content_scripts/annotate.js"]
     }
   }
