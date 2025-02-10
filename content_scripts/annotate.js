@@ -1,19 +1,32 @@
-var opened = false;
-
-function openclose() {
-    if (opened) {
-        opened = false;
-        console.log("no longer opened");
-    } else {
-        opened = true;
-        console.log("opened");
+(() => {
+    var opened = false;
+    /**
+     * Check and set a global guard variable.
+     * If this content script is injected into the same page again,
+     * it will do nothing next time.
+     */
+    if (window.hasRun) {
+      return;
     }
-}
+    window.hasRun = true;
 
-browser.runtime.onMessage.addListener((message) => {
-    if (message == "openclose") {
+    function openclose() {
+        if (opened) {
+            opened = false;
+            alert("no longer opened");
+        } else {
+            opened = true;
+            alert("opened");
+        }
+    }
+  
+    /**
+     * Listen for messages from the background script.
+     * Call "insertBeast()" or "removeExistingBeasts()".
+     */
+    browser.runtime.onMessage.addListener((message) => {
+      if (message.command === "openclose") {
         openclose();
-    }
-});
-
-console.log("started running");
+      }
+    });
+  })();
