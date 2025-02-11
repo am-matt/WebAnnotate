@@ -26,7 +26,6 @@ function listenForClicks() {
             return;
         }
         if (e.target.id === "openclose") {
-            console.log("this ran");
             browser.tabs
             .query({ active: true, currentWindow: true })
             .then(openclose)
