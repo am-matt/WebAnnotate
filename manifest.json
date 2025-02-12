@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "WebAnnotate",
-    "version": "0.0.01",
+    "version": "0.0.2",
   
     "description": "Draw and highlight on webpages.",
     "homepage_url": "https://github.com/am-matt/WebAnnotate",

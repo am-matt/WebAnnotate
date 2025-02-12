@@ -1,4 +1,7 @@
 var toolbox;
+var canvas;
+var ctx;
+var mode = "cursor";
 var opened = false;
 
 function openclose() {
@@ -27,6 +30,17 @@ function loadToolbox() {
     iframe.src = browser.extension.getURL("ui/toolbox.html");
     div.appendChild(iframe);
     document.body.append(div);
+    canvas = document.createElement("canvas");
+    ctx = canvas.getContext("2d");
+    document.body.append(canvas);
+    canvas.style.all = "initial";
+    canvas.id = "webannotate-canvas";
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    canvas.style.zIndex = 9999;
+    canvas.style.top = 0;
+    canvas.style.left = 0;
+    canvas.style.position = "fixed";
     
     const stylesheet = document.createElement("style");
     stylesheet.textContent = `
@@ -35,23 +49,58 @@ function loadToolbox() {
           position: fixed;
           top: 0;
           left: 0;
-          height: 290px;
-          width: 515px;
+          height: 100px;
+          width: 100px;
           z-index: 99999;
         }
     `;
     document.head.appendChild(stylesheet);
     iframe.style.visibility = "visible";
     toolbox = iframe;
+
+    document.addEventListener("click", handleClickEvent);
+    document.addEventListener("mousemove", handleMouseEvent);
+    
   } else {
     toolbox.style.visibility = "visible";
   }
 }
 
+function handleClickEvent(e) {
+  if (mode == "draw") {
+    draw(e.clientX,e.clientY);
+  }
+}
+
+function handleMouseEvent(e) {
+  if (mode == "draw" && e.buttons == 1) {
+    draw(e.clientX,e.clientY);
+  }
+}
+
+function updateStatus(status) {
+  mode = status;
+}
+
+function draw(x,y) {
+  if (canvas) {
+    ctx.beginPath();
+    ctx.arc(x,y,10,0,2*Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
+  }
+}
+
+window.onresize = () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
 
 browser.runtime.onMessage.addListener((message) => {
   if (message == "ext-openclose") {
     openclose();
-    return true;
+  } else if (message.command == "updateStatus") {
+    updateStatus(message.status)
   }
+  return true;
 })

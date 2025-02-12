@@ -21,3 +21,9 @@ browser.browserAction.onClicked.addListener(() => {
     .then(openclose)
     .catch(onError);
 });
+
+browser.runtime.onMessage.addListener((message,sender) => {
+    if (message.command == "updateStatus") {
+        browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
+    }
+})
