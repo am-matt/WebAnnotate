@@ -2,6 +2,7 @@ var toolbox;
 var canvas;
 var ctx;
 var mode = "cursor";
+var prevX, prevY
 var opened = false;
 
 function openclose() {
@@ -59,10 +60,17 @@ function loadToolbox() {
     toolbox = iframe;
 
     document.addEventListener("click", handleClickEvent);
-    document.addEventListener("mousemove", handleMouseEvent);
-    
+    document.addEventListener("mousemove", handleMouseMoveEvent);
+    document.addEventListener("mousedown", onMouseDown);
   } else {
     toolbox.style.visibility = "visible";
+  }
+}
+
+function onMouseDown(e) {
+  if (mode == "draw") {
+    ctx.beginPath();
+    ctx.moveTo(e.clientX, e.clientY);
   }
 }
 
@@ -72,7 +80,7 @@ function handleClickEvent(e) {
   }
 }
 
-function handleMouseEvent(e) {
+function handleMouseMoveEvent(e) {
   if (mode == "draw" && e.buttons == 1) {
     draw(e.clientX,e.clientY);
   }
@@ -84,10 +92,12 @@ function updateStatus(status) {
 
 function draw(x,y) {
   if (canvas) {
-    ctx.beginPath();
-    ctx.arc(x,y,10,0,2*Math.PI);
-    ctx.fillStyle = "red";
-    ctx.fill();
+    ctx.strokeStyle = "red";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.lineWidth = 10;
+    ctx.lineTo(x,y);
+    ctx.stroke(); 
   }
 }
 
