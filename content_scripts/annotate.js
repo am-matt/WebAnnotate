@@ -19,11 +19,13 @@ function openclose() {
 function hideToolBox() {
   if (toolbox) {
     toolbox.style.visibility = "hidden";
+    canvas.style.visibility = "hidden";
   }
 }
 
 function loadToolbox() {
   if (!toolbox) {
+    console.log("loading toolbox....")
     const div = document.createElement("div");
     div.className = 'ext-toolbox';
     const iframe = document.createElement("iframe");
@@ -36,12 +38,13 @@ function loadToolbox() {
     document.body.append(canvas);
     canvas.style.all = "initial";
     canvas.id = "webannotate-canvas";
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    canvas.style.zIndex = 9999;
+    canvas.width = document.body.scrollWidth;
+    canvas.height = document.body.scrollHeight;
+    canvas.style.zIndex = 999999999;
     canvas.style.top = 0;
     canvas.style.left = 0;
-    canvas.style.position = "fixed";
+    canvas.style.position = "absolute";
+    canvas.inert = true;
     
     const stylesheet = document.createElement("style");
     stylesheet.textContent = `
@@ -52,7 +55,7 @@ function loadToolbox() {
           left: 0;
           height: 100px;
           width: 100px;
-          z-index: 99999;
+          z-index: 999999999999;
         }
     `;
     document.head.appendChild(stylesheet);
@@ -64,30 +67,36 @@ function loadToolbox() {
     document.addEventListener("mousedown", onMouseDown);
   } else {
     toolbox.style.visibility = "visible";
+    canvas.style.visibility = "visible";
   }
 }
 
 function onMouseDown(e) {
   if (mode == "draw") {
     ctx.beginPath();
-    ctx.moveTo(e.clientX, e.clientY);
+    ctx.moveTo(e.pageX, e.pageY);
   }
 }
 
 function handleClickEvent(e) {
   if (mode == "draw") {
-    draw(e.clientX,e.clientY);
+    draw(e.pageX,e.pageY);
   }
 }
 
 function handleMouseMoveEvent(e) {
   if (mode == "draw" && e.buttons == 1) {
-    draw(e.clientX,e.clientY);
+    draw(e.pageX,e.pageY);
   }
 }
 
 function updateStatus(status) {
   mode = status;
+  if (status == "cursor") {
+    canvas.inert = true;
+  } else {
+    canvas.inert = false;
+  }
 }
 
 function draw(x,y) {
@@ -101,10 +110,16 @@ function draw(x,y) {
   }
 }
 
-window.onresize = () => {
-  canvas.width = window.innerWidth;
+
+/*window.onresize = () => {
+  canvas.width = document.body.scrollWidth;
+  canvas.height = document.body.scrollHeight;
+
+
+  // canvas clearing
+  /*canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-}
+}*/
 
 browser.runtime.onMessage.addListener((message) => {
   if (message == "ext-openclose") {
