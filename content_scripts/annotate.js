@@ -1,3 +1,6 @@
+const webPath = window.location.href.split('?')[0];
+
+// canvas handling
 var toolbox;
 var canvas;
 var ctx;
@@ -72,7 +75,11 @@ function loadToolbox() {
 }
 
 function onMouseDown(e) {
-  if (mode == "draw") {
+  if (mode == "draw" || mode == "erase") {
+    ctx.strokeStyle = "red";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.lineWidth = 10;
     ctx.beginPath();
     ctx.moveTo(e.pageX, e.pageY);
   }
@@ -81,12 +88,16 @@ function onMouseDown(e) {
 function handleClickEvent(e) {
   if (mode == "draw") {
     draw(e.pageX,e.pageY);
+  } else if (mode == "erase") {
+    erase(e.pageX,e.pageY);
   }
 }
 
 function handleMouseMoveEvent(e) {
   if (mode == "draw" && e.buttons == 1) {
     draw(e.pageX,e.pageY);
+  } else if (mode == "erase" && e.buttons == 1) {
+    erase(e.pageX,e.pageY);
   }
 }
 
@@ -101,15 +112,45 @@ function updateStatus(status) {
 
 function draw(x,y) {
   if (canvas) {
-    ctx.strokeStyle = "red";
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.lineWidth = 10;
     ctx.lineTo(x,y);
     ctx.stroke(); 
   }
 }
 
+function erase(x,y) {
+  if (canvas) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineTo(x,y);
+    ctx.stroke();
+    ctx.restore()
+  }
+}
+
+function save() {
+  console.log("TRYING TO SAVE");
+  const canvasData = canvas.toDataURL();
+  const save = browser.storage.local.set({[webPath]:[canvasData]});
+  save.then(() => {
+    console.log("SAVED");
+  }, onError)
+}
+
+function load() {
+  console.log("LOADING");
+  const canvasData = browser.storage.local.get(webPath);
+  canvasData.then((result) => {
+    const imageData = result[webPath][0];
+    const image = new Image();
+    image.src = imageData;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(image,0,0)
+  }, onError);
+}
+
+function onError(e) {
+  console.log(e);
+}
 
 /*window.onresize = () => {
   canvas.width = document.body.scrollWidth;
@@ -126,6 +167,12 @@ browser.runtime.onMessage.addListener((message) => {
     openclose();
   } else if (message.command == "updateStatus") {
     updateStatus(message.status)
+  } else if (message.command == "saveLoad") {
+    if (message.status == "save") {
+      save();
+    } else {
+      load();
+    }
   }
   return true;
 })
