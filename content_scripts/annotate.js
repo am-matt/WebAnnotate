@@ -7,6 +7,11 @@ var ctx;
 var mode = "cursor";
 var prevX, prevY
 var opened = false;
+var saveStack = [];
+var currentPoints = [];
+
+var saveStates = [];
+var redoStates = [];
 
 function openclose() {
     if (opened) {
@@ -69,9 +74,52 @@ function loadToolbox() {
     document.addEventListener("click", handleClickEvent);
     document.addEventListener("mousemove", handleMouseMoveEvent);
     document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener('keydown', keyPressHandler);
   } else {
     toolbox.style.visibility = "visible";
     canvas.style.visibility = "visible";
+  }
+}
+
+/*function drawPaths() {
+  // delete everything
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // draw all the paths in the paths array
+  for (let i = 0; i < saveStack.length; i++) {x
+    ctx.beginPath();
+    ctx.moveTo(saveStack[i][0].x,saveStack[i][0].y);
+    for (let j = 0; j < saveStack[i].length; j++) {
+      ctx.lineTo(saveStack[i][j].x,saveStack[i][j].y);
+    }
+    ctx.stroke(); 
+  }
+}  */
+
+function removePathFromStack(stack) {
+  return new Promise(function (resolve, reject) {
+    let toRemove = stack.pop();
+    resolve(toRemove);
+  })
+}
+
+function undoPath() {
+  if (saveStates.length > 0) {
+    redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    removePathFromStack(saveStates).then(() => {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.putImageData(saveStates[saveStates.length-1],0,0);
+    })
+  }
+}
+
+function redoPath() {
+  if (redoStates.length > 0) {
+    saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    removePathFromStack(redoStates).then((p) => {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.putImageData(p,0,0);
+    })
   }
 }
 
@@ -85,6 +133,23 @@ function onMouseDown(e) {
     ctx.moveTo(e.pageX, e.pageY);
   }
 }
+
+function onMouseUp(e) {
+  if (mode == "draw" || mode == "erase") {
+    saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    if (redoStates.length > 0) {
+      redoStates = [];
+    }
+  }
+}
+
+/*function finishPath() {
+  if (currentPoints.length > 0) {
+    saveStack.push(currentPoints);
+    currentPoints = [];
+    console.log(saveStack);
+  }
+}*/
 
 function handleClickEvent(e) {
   if (mode == "draw") {
@@ -115,6 +180,7 @@ function draw(x,y) {
   if (canvas) {
     ctx.lineTo(x,y);
     ctx.stroke(); 
+   // currentPoints.push({x:x,y:y});
   }
 }
 
@@ -174,6 +240,15 @@ function onError(e) {
   canvas.height = window.innerHeight;
 }*/
 
+function keyPressHandler(e) {
+      if (e.ctrlKey && e.shiftKey && e.keyCode == 90) {
+        redoPath();
+      }
+      else if (e.ctrlKey && e.keyCode == 90) {
+          undoPath();
+      }
+}
+
 browser.runtime.onMessage.addListener((message) => {
   if (message == "ext-openclose") {
     openclose();
@@ -194,3 +269,4 @@ browser.runtime.onMessage.addListener((message) => {
   }
   return true;
 })
+
