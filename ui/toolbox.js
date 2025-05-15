@@ -5,8 +5,7 @@ const cursorButton = $("cursor-button");
 const saveButton = $("save-button")
 const loadButton = $("load-button")
 const eraseButton = $("erase-button")
-const statusText = $("mode-info")
-var mode = "cursor";
+var mode = cursorButton;
 
 menu.addEventListener("onmouseenter", () => {
     updateStatus("changeMenu","in");
@@ -17,15 +16,15 @@ menu.addEventListener("onmouseleave", () => {
 })
 
 cursorButton.addEventListener("click", () => {
-    updateStatus("updateStatus","cursor")
+    updateStatus("updateStatus","cursor",cursorButton)
 })
 
 drawButton.addEventListener("click", () => {
-    updateStatus("updateStatus","draw")
+    updateStatus("updateStatus","draw",drawButton)
 })
 
 eraseButton.addEventListener("click", () => {
-    updateStatus("updateStatus","erase")
+    updateStatus("updateStatus","erase",eraseButton)
 })
 
 saveButton.addEventListener("click", () => {
@@ -36,10 +35,11 @@ loadButton.addEventListener("click", () => {
     updateStatus("saveLoad","load");
 })
 
-function updateStatus(command, status) {
+function updateStatus(command, status, button) {
     if (command == "updateStatus") {
-        mode = status;
-        statusText.innerHTML = status;
+        mode.classList.remove("selected");
+        button.classList.add("selected");
+        mode = button;
     }
     browser.runtime.sendMessage({command:command,status:status})
 }
