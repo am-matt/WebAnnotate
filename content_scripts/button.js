@@ -23,9 +23,6 @@ browser.browserAction.onClicked.addListener(() => {
 });
 
 browser.runtime.onMessage.addListener((message,sender) => {
-    if (message.command == "updateStatus") {
-        browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
-    } else if (message.command == "saveLoad") {
-        browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
-    }
+    browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
+    browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
 })

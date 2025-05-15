@@ -47,6 +47,7 @@ function loadToolbox() {
     canvas.style.top = 0;
     canvas.style.left = 0;
     canvas.style.position = "absolute";
+    canvas.style.cursor = "crosshair";
     canvas.inert = true;
     
     const stylesheet = document.createElement("style");
@@ -54,10 +55,10 @@ function loadToolbox() {
         .ext-toolbox {
           all: initial;
           position: fixed;
-          top: 0;
-          left: 0;
-          height: 100px;
-          width: 100px;
+          top: 15px;
+          left: 15px;
+          height: 250px;
+          width: 200px;
           z-index: 999999999999;
         }
     `;
@@ -142,10 +143,21 @@ function load() {
   canvasData.then((result) => {
     const imageData = result[webPath][0];
     const image = new Image();
+    image.onload = () => {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(image,0,0)
+      console.log("LOADED");
+    }
     image.src = imageData;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(image,0,0)
   }, onError);
+}
+
+function minimizeToolbox() {
+  toolbox.style.opacity = 0.5;
+}
+
+function maximizeToolbox() {
+  toolbox.style.opacity = 0;
 }
 
 function onError(e) {
@@ -172,6 +184,12 @@ browser.runtime.onMessage.addListener((message) => {
       save();
     } else {
       load();
+    }
+  } else if (message.command == "changeMenu") {
+    if (message.status == "in") {
+      maximizeToolbox();
+    } else {
+      minimizeToolbox();
     }
   }
   return true;

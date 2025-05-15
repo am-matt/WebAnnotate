@@ -1,5 +1,39 @@
-body {
+#menu {
+    position: fixed;
+    width: 95%;
+    height: 95%;
     background-color: white;
+    border-radius: 5%;  
+    display: flexbox;
+    justify-content: center;
+    align-items: center;
+}
+
+#statusButtons {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.statusButton {
+    border: none;
+    outline: none;
+    margin-left: 10px;
+    border-radius: 100%;
+    height: 30px;
+    width: 30px;
+    outline-style: solid;
+    outline-color: white;
+    background-color: black;
+    cursor: pointer;
+}
+
+.fi {
+    width: 100%;
+    height: 100%;
+    color: white;
 }
 
 h1 {
