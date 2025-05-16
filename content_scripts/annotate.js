@@ -6,7 +6,10 @@ var canvas;
 var ctx;
 var mode = "cursor";
 var prevX, prevY
+var undoRedoCap = 10; // TEMPORARY, REPLACE WHEN SETTINGS IS IMPLEMENTED
+var penWidth = 10; // TEMPORARY, REPLACE WHEN TOOLBOX IS FULLY IMPLEMENTED
 var opened = false;
+var undoredoAction = false;
 var saveStack = [];
 var currentPoints = [];
 
@@ -82,20 +85,6 @@ function loadToolbox() {
   }
 }
 
-/*function drawPaths() {
-  // delete everything
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // draw all the paths in the paths array
-  for (let i = 0; i < saveStack.length; i++) {x
-    ctx.beginPath();
-    ctx.moveTo(saveStack[i][0].x,saveStack[i][0].y);
-    for (let j = 0; j < saveStack[i].length; j++) {
-      ctx.lineTo(saveStack[i][j].x,saveStack[i][j].y);
-    }
-    ctx.stroke(); 
-  }
-}  */
-
 function removePathFromStack(stack) {
   return new Promise(function (resolve, reject) {
     let toRemove = stack.pop();
@@ -104,23 +93,34 @@ function removePathFromStack(stack) {
 }
 
 function undoPath() {
-  if (saveStates.length > 0) {
-    redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-    removePathFromStack(saveStates).then(() => {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.putImageData(saveStates[saveStates.length-1],0,0);
-    })
-  }
+  return new Promise(function (resolve, reject) {
+    if (!undoredoAction && saveStates.length != 0) {
+      undoredoAction = true;
+      redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+      removePathFromStack(saveStates).then(() => {
+        ctx.clearRect(0,0,canvas.width,canvas.height); 
+        if (saveStates.length > 0) {
+          ctx.putImageData(saveStates[saveStates.length-1],0,0);
+        }
+      })
+    }
+    resolve();
+  })
 }
 
 function redoPath() {
-  if (redoStates.length > 0) {
-    saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-    removePathFromStack(redoStates).then((p) => {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.putImageData(p,0,0);
-    })
-  }
+  return new Promise(function (resolve, reject) {
+    if (!undoredoAction && redoStates[redoStates.length-1] != null) {
+      undoredoAction = true;
+      saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+      removePathFromStack(redoStates).then((p) => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.putImageData(p,0,0);
+      })
+    }
+    resolve();
+  })
+  
 }
 
 function onMouseDown(e) {
@@ -128,7 +128,7 @@ function onMouseDown(e) {
     ctx.strokeStyle = "red";
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
-    ctx.lineWidth = 10;
+    ctx.lineWidth = penWidth;
     ctx.beginPath();
     ctx.moveTo(e.pageX, e.pageY);
   }
@@ -136,20 +136,17 @@ function onMouseDown(e) {
 
 function onMouseUp(e) {
   if (mode == "draw" || mode == "erase") {
+    
     saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    console.log(saveStates);
     if (redoStates.length > 0) {
       redoStates = [];
     }
+    if (saveStates.length > undoRedoCap) {
+      saveStates.shift();
+    }
   }
 }
-
-/*function finishPath() {
-  if (currentPoints.length > 0) {
-    saveStack.push(currentPoints);
-    currentPoints = [];
-    console.log(saveStack);
-  }
-}*/
 
 function handleClickEvent(e) {
   if (mode == "draw") {
@@ -180,7 +177,6 @@ function draw(x,y) {
   if (canvas) {
     ctx.lineTo(x,y);
     ctx.stroke(); 
-   // currentPoints.push({x:x,y:y});
   }
 }
 
@@ -192,6 +188,10 @@ function erase(x,y) {
     ctx.stroke();
     ctx.restore()
   }
+}
+
+function updatePenSize(penSize) {
+  penWidth = penSize;
 }
 
 function save() {
@@ -242,10 +242,10 @@ function onError(e) {
 
 function keyPressHandler(e) {
       if (e.ctrlKey && e.shiftKey && e.keyCode == 90) {
-        redoPath();
+        redoPath().then(()=>{undoredoAction = false;});
       }
       else if (e.ctrlKey && e.keyCode == 90) {
-          undoPath();
+        undoPath().then(()=>{undoredoAction = false;});
       }
 }
 
@@ -266,6 +266,8 @@ browser.runtime.onMessage.addListener((message) => {
     } else {
       minimizeToolbox();
     }
+  } else if (message.command == "resize") {
+    updatePenSize(message.status);
   }
   return true;
 })

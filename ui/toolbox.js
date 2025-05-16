@@ -5,7 +5,12 @@ const cursorButton = $("cursor-button");
 const saveButton = $("save-button")
 const loadButton = $("load-button")
 const eraseButton = $("erase-button")
+const sizeSlider = $("sizeSlider");
 var mode = cursorButton;
+
+sizeSlider.addEventListener("change", () => {
+    updateStatus("resize", sizeSlider.value);
+})
 
 menu.addEventListener("onmouseenter", () => {
     updateStatus("changeMenu","in");
