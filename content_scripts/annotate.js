@@ -12,6 +12,7 @@ var opened = false;
 var undoredoAction = false;
 var saveStack = [];
 var currentPoints = [];
+var color = "rgba(255,0,0,1)";
 
 var saveStates = [];
 var redoStates = [];
@@ -51,6 +52,7 @@ function loadToolbox() {
     canvas.id = "webannotate-canvas";
     canvas.width = document.body.scrollWidth;
     canvas.height = document.body.scrollHeight;
+    canvas.style.userSelect = "none"
     canvas.style.zIndex = 999999999;
     canvas.style.top = 0;
     canvas.style.left = 0;
@@ -125,7 +127,7 @@ function redoPath() {
 
 function onMouseDown(e) {
   if (mode == "draw" || mode == "erase") {
-    ctx.strokeStyle = "red";
+    ctx.strokeStyle = color;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     ctx.lineWidth = penWidth;
@@ -268,6 +270,8 @@ browser.runtime.onMessage.addListener((message) => {
     }
   } else if (message.command == "resize") {
     updatePenSize(message.status);
+  } else if (message.command == "newColor") {
+    color = message.status;
   }
   return true;
 })

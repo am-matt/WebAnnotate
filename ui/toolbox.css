@@ -21,6 +21,43 @@
     margin-bottom: 5px;
 }
 
+.colorButton {
+    border: none;
+    padding: 15px;
+}
+
+.colorButton.selected {
+    border: solid;
+    border-color: white;
+    border-width: 2px;
+}
+
+#colorLabel {
+    font-size: 12px;
+    color: white;
+}
+
+
+#colorSelection {
+    display: flex;
+}
+
+#addNewColorButton {
+    position: relative;
+    padding: 5px;
+    background-color: white;
+}
+
+#colorSelector {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0%;
+}
+
+
 .statusButton {
     border: none;
     outline: none;
