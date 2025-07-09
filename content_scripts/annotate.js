@@ -13,6 +13,7 @@ var undoredoAction = false;
 var saveStack = [];
 var currentPoints = [];
 var color = "rgba(255,0,0,1)";
+var colors = [];
 
 var saveStates = [];
 var redoStates = [];
@@ -196,10 +197,10 @@ function updatePenSize(penSize) {
   penWidth = penSize;
 }
 
-function save() {
+async function save() {
   console.log("TRYING TO SAVE");
   const canvasData = canvas.toDataURL();
-  const save = browser.storage.local.set({[webPath]:[canvasData]});
+  const save = browser.storage.local.set({[webPath]:[[canvasData,colors]]});
   save.then(() => {
     console.log("SAVED");
   }, onError)
@@ -209,7 +210,8 @@ function load() {
   console.log("LOADING");
   const canvasData = browser.storage.local.get(webPath);
   canvasData.then((result) => {
-    const imageData = result[webPath][0];
+    toolbox.contentWindow.postMessage(data=result[webPath][0][1],targetOrigin=toolbox.src);
+    const imageData = result[webPath][0][0];
     const image = new Image();
     image.onload = () => {
       ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -272,7 +274,13 @@ browser.runtime.onMessage.addListener((message) => {
     updatePenSize(message.status);
   } else if (message.command == "newColor") {
     color = message.status;
+  } else if (message.command == "colorUpdate") {
+    colors = message.status;
   }
   return true;
 })
 
+
+window.addEventListener("message", (e) => {
+  console.log("got something");
+})
