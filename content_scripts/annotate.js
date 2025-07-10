@@ -68,7 +68,7 @@ function loadToolbox() {
           position: fixed;
           top: 15px;
           left: 15px;
-          height: 250px;
+          height: 260px;
           width: 200px;
           z-index: 999999999999;
         }
@@ -78,6 +78,7 @@ function loadToolbox() {
     toolbox = iframe;
 
     //document.addEventListener("click", handleClickEvent);
+    document.addEventListener("contextmenu", noContext);
     document.addEventListener("mousemove", handleMouseMoveEvent);
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
@@ -85,6 +86,13 @@ function loadToolbox() {
   } else {
     toolbox.style.visibility = "visible";
     canvas.style.visibility = "visible";
+  }
+}
+
+function noContext(e) {
+  if (canvas.matches(':hover')) {
+    e.preventDefault();
+    return false;
   }
 }
 
@@ -97,6 +105,7 @@ function removePathFromStack(stack) {
 
 function undoPath() {
   if (!undoredoAction && saveStates.length != 0) {
+    console.log("undoing");
     undoredoAction = true;
     redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
     removePathFromStack(saveStates).then(() => {
@@ -136,20 +145,24 @@ function onMouseDown(e) {
 }
 
 function onMouseUp(e) {
-  if (mode == "draw" || mode == "erase") {
+  if ((mode == "draw" || mode == "erase") && e.button == 0 && canvas.matches(":hover")) {
     if (mode == "draw") {
       draw(e.pageX,e.pageY);
-    } else {
+    } else if (mode == "erase") {
       erase(e.pageX,e.pageY);
     }
-    saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-    console.log(saveStates);
-    if (redoStates.length > 0) {
-      redoStates = [];
-    }
-    if (saveStates.length > undoRedoCap) {
-      saveStates.shift();
-    }
+    updateUndoStack();
+  }
+}
+
+function updateUndoStack() {
+  saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+  console.log(saveStates);
+  if (redoStates.length > 0) {
+    redoStates = [];
+  }
+  if (saveStates.length > undoRedoCap) {
+    saveStates.shift();
   }
 }
 
@@ -197,6 +210,12 @@ function erase(x,y) {
 
 function updatePenSize(penSize) {
   penWidth = penSize;
+}
+
+function clearBoard() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  updateUndoStack();
+  canvas.focus();
 }
 
 async function save() {
@@ -284,6 +303,8 @@ browser.runtime.onMessage.addListener((message) => {
     } else {
       redoPath();
     }
+  } else if (message.command == "clearBoard") {
+    clearBoard();
   }
   return true;
 })

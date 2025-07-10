@@ -11,6 +11,8 @@ const colorSelector = $("colorSelector");
 const colorOptions = $("colorButtons");
 const undoButton = $("undoButton");
 const redoButton = $("redoButton");
+const clearBoardButton = $("clearBoardButton");
+const settingsButton = $("settingsButton");
 var defaultColors = ["#FF0000","#00FF00","#0000FF"] // TO BE REPLACED WITH SETTINGS MENU UPDATE
 var colors = [];
 var colorsString = [];
@@ -140,9 +142,29 @@ redoButton.addEventListener("click", () => {
     updateStatus("undoRedo", "redo");
 })
 
+clearBoardButton.addEventListener("click", () => {
+    if (window.confirm("Clear board?")) {
+        updateStatus("clearBoard")
+    }
+})
+
+settingsButton.addEventListener("click", () => {
+    updateStatus("settings");
+})
+
 // Script Communication and Toolbox startup functions
 
-function updateStatus(command, status, button) {
+document.addEventListener('keydown', keyPressHandler);
+function keyPressHandler(e) {
+      if (e.ctrlKey && e.shiftKey && e.keyCode == 90) {
+        updateStatus("undoRedo","redo");
+      }
+      else if (e.ctrlKey && e.keyCode == 90) {
+        updateStatus("undoRedo","undo");
+      }
+}
+
+function updateStatus(command, status=null, button) {
     if (command == "updateStatus") {
         mode.classList.remove("selected");
         button.classList.add("selected");

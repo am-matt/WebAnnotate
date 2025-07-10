@@ -23,5 +23,13 @@ browser.browserAction.onClicked.addListener(() => {
 });
 
 browser.runtime.onMessage.addListener((message,sender) => {
-    browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
+    if (message.command == "settings") {
+        var createData = {
+          url: "settings/settings.html",
+        };
+        var creating = browser.tabs.create(createData);
+    } else {
+        browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
+    }
+    
 })

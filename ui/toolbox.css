@@ -72,6 +72,11 @@
     cursor: pointer;
 }
 
+#footerButtons {
+    padding-top: 5px;
+    padding-left: 5px;
+}
+
 #quickActions {
     padding-left: 5px;
     padding-top: 5px;
