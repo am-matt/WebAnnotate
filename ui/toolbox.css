@@ -72,6 +72,25 @@
     cursor: pointer;
 }
 
+#quickActions {
+    padding-left: 5px;
+    padding-top: 5px;
+}
+
+.quickButton {
+    border: none;
+    outline: none;
+    margin-left: 5px;
+    border-radius: 100%;
+    outline-style: solid;
+    outline-color: white;
+    outline-width: 2px;
+    background-color: black;
+    cursor: pointer;
+    height: 25px;
+    width: 25px;
+}
+
 .selected {
     background-color: white;
     outline-color: black;

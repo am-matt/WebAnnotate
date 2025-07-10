@@ -77,7 +77,7 @@ function loadToolbox() {
     iframe.style.visibility = "visible";
     toolbox = iframe;
 
-    document.addEventListener("click", handleClickEvent);
+    //document.addEventListener("click", handleClickEvent);
     document.addEventListener("mousemove", handleMouseMoveEvent);
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
@@ -96,34 +96,32 @@ function removePathFromStack(stack) {
 }
 
 function undoPath() {
-  return new Promise(function (resolve, reject) {
-    if (!undoredoAction && saveStates.length != 0) {
-      undoredoAction = true;
-      redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-      removePathFromStack(saveStates).then(() => {
-        ctx.clearRect(0,0,canvas.width,canvas.height); 
-        if (saveStates.length > 0) {
-          ctx.putImageData(saveStates[saveStates.length-1],0,0);
-        }
-      })
-    }
-    resolve();
-  })
+  if (!undoredoAction && saveStates.length != 0) {
+    undoredoAction = true;
+    redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    removePathFromStack(saveStates).then(() => {
+      ctx.clearRect(0,0,canvas.width,canvas.height); 
+      if (saveStates.length > 0) {
+        ctx.putImageData(saveStates[saveStates.length-1],0,0);
+      }
+      undoredoAction = false;
+    })
+  }
 }
 
 function redoPath() {
-  return new Promise(function (resolve, reject) {
-    if (!undoredoAction && redoStates[redoStates.length-1] != null) {
-      undoredoAction = true;
-      saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-      removePathFromStack(redoStates).then((p) => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.putImageData(p,0,0);
-      })
-    }
-    resolve();
-  })
-  
+  if (!undoredoAction && redoStates.length > 0) {
+    console.log("redoing it");
+    undoredoAction = true;
+    saveStates.push(redoStates[redoStates.length-1]);
+    removePathFromStack(redoStates).then((p) => {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.putImageData(p,0,0);
+      undoredoAction = false;
+    })
+  } else {
+    console.log("not redoing it :(");
+  }
 }
 
 function onMouseDown(e) {
@@ -139,7 +137,11 @@ function onMouseDown(e) {
 
 function onMouseUp(e) {
   if (mode == "draw" || mode == "erase") {
-    
+    if (mode == "draw") {
+      draw(e.pageX,e.pageY);
+    } else {
+      erase(e.pageX,e.pageY);
+    }
     saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
     console.log(saveStates);
     if (redoStates.length > 0) {
@@ -151,13 +153,13 @@ function onMouseUp(e) {
   }
 }
 
-function handleClickEvent(e) {
+/*function handleClickEvent(e) {
   if (mode == "draw") {
     draw(e.pageX,e.pageY);
   } else if (mode == "erase") {
     erase(e.pageX,e.pageY);
   }
-}
+}*/
 
 function handleMouseMoveEvent(e) {
   if (mode == "draw" && e.buttons == 1) {
@@ -177,14 +179,14 @@ function updateStatus(status) {
 }
 
 function draw(x,y) {
-  if (canvas) {
+  if (canvas && toolbox.style.visibility != "hidden") {
     ctx.lineTo(x,y);
     ctx.stroke(); 
   }
 }
 
 function erase(x,y) {
-  if (canvas) {
+  if (canvas && toolbox.style.visibility != "hidden") {
     ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
     ctx.lineTo(x,y);
@@ -246,10 +248,10 @@ function onError(e) {
 
 function keyPressHandler(e) {
       if (e.ctrlKey && e.shiftKey && e.keyCode == 90) {
-        redoPath().then(()=>{undoredoAction = false;});
+        redoPath();
       }
       else if (e.ctrlKey && e.keyCode == 90) {
-        undoPath().then(()=>{undoredoAction = false;});
+        undoPath();
       }
 }
 
@@ -276,11 +278,12 @@ browser.runtime.onMessage.addListener((message) => {
     color = message.status;
   } else if (message.command == "colorUpdate") {
     colors = message.status;
+  } else if (message.command == "undoRedo") {
+    if (message.status == "undo") {
+      undoPath();
+    } else {
+      redoPath();
+    }
   }
   return true;
-})
-
-
-window.addEventListener("message", (e) => {
-  console.log("got something");
 })

@@ -9,11 +9,25 @@ const sizeSlider = $("sizeSlider");
 const colorButton = $("addNewColorButton");
 const colorSelector = $("colorSelector");
 const colorOptions = $("colorButtons");
-var defaultColors = ["rgba(255,0,0,1)","rgba(0,255,0,1)","rgba(0,0,255,1)"]
+const undoButton = $("undoButton");
+const redoButton = $("redoButton");
+var defaultColors = ["#FF0000","#00FF00","#0000FF"] // TO BE REPLACED WITH SETTINGS MENU UPDATE
 var colors = [];
 var colorsString = [];
 var mode = cursorButton;
 var colorAdd = "new"
+
+// CSS styles return rgba(r,g,b) format by default but this program uses hex to store colors
+function RGBAToHexA(rgba, forceRemoveAlpha = false) {
+  return "#" + rgba.replace(/^rgba?\(|\s+|\)$/g, '') // Get's rgba / rgb string values
+    .split(',') // splits them at ","
+    .filter((string, index) => !forceRemoveAlpha || index !== 3)
+    .map(string => parseFloat(string)) // Converts them to numbers
+    .map((number, index) => index === 3 ? Math.round(number * 255) : number) // Converts alpha to 255 number
+    .map(number => number.toString(16)) // Converts numbers to hex
+    .map(string => string.length === 1 ? "0" + string : string) // Adds 0 when length of one number is 1
+    .join("") // Puts the array to togehter to a string
+}
 
 // Color Selection
 colorSelector.addEventListener("change", () => {
@@ -22,7 +36,10 @@ colorSelector.addEventListener("change", () => {
     } else {
         colors.forEach((b) => {
             if (b.classList.contains("selected")) {
-                const i = colorsString.indexOf(b.style.backgroundColor);
+                const oldColor = RGBAToHexA(b.style.backgroundColor).toUpperCase();
+                const i = colorsString.indexOf(oldColor);
+                console.log(colorsString);
+                console.log(i);
                 b.style.backgroundColor = colorSelector.value;
                 colorsString[i] = b.style.backgroundColor;
                 updateStatus("newColor", b.style.backgroundColor);
@@ -80,6 +97,7 @@ function colorPressed(b) {
 }
 
 // Mode Switching
+
 sizeSlider.addEventListener("change", () => {
     updateStatus("resize", sizeSlider.value);
 })
@@ -104,6 +122,8 @@ eraseButton.addEventListener("click", () => {
     updateStatus("updateStatus","erase",eraseButton)
 })
 
+// Action Buttons
+
 saveButton.addEventListener("click", () => {
     updateStatus("saveLoad","save");
 })
@@ -111,6 +131,16 @@ saveButton.addEventListener("click", () => {
 loadButton.addEventListener("click", () => {
     updateStatus("saveLoad","load");
 })
+
+undoButton.addEventListener("click", () => {
+    updateStatus("undoRedo", "undo");
+})
+
+redoButton.addEventListener("click", () => {
+    updateStatus("undoRedo", "redo");
+})
+
+// Script Communication and Toolbox startup functions
 
 function updateStatus(command, status, button) {
     if (command == "updateStatus") {
