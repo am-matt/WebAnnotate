@@ -255,6 +255,10 @@ function onError(e) {
   console.log(e);
 }
 
+function theTestFunction() {
+  alert("I WAS ALERTED");
+}
+
 /*window.onresize = () => {
   canvas.width = document.body.scrollWidth;
   canvas.height = document.body.scrollHeight;
@@ -274,37 +278,29 @@ function keyPressHandler(e) {
       }
 }
 
+function newColor(updated) {
+  color = updated;
+}
+
+function updateColors(newColors) {
+  colors = newColors;
+}
+
+annotationActions = {
+  "openclose":openclose,
+  "updateStatus":updateStatus,
+  "save": save,
+  "load": load,
+  "maximizeToolbox": maximizeToolbox,
+  "minimizeToolbox": minimizeToolbox,
+  "updatePenSize": updatePenSize,
+  "newColor": newColor,
+  "colorUpdate": updateColors,
+  "undoPath": undoPath,
+  "redoPath": redoPath, 
+  "clearBoard": clearBoard
+}
+
 browser.runtime.onMessage.addListener((message) => {
-  if (message == "ext-openclose") {
-    openclose();
-  } else if (message.command == "updateStatus") {
-    updateStatus(message.status)
-  } else if (message.command == "saveLoad") {
-    if (message.status == "save") {
-      save();
-    } else {
-      load();
-    }
-  } else if (message.command == "changeMenu") {
-    if (message.status == "in") {
-      maximizeToolbox();
-    } else {
-      minimizeToolbox();
-    }
-  } else if (message.command == "resize") {
-    updatePenSize(message.status);
-  } else if (message.command == "newColor") {
-    color = message.status;
-  } else if (message.command == "colorUpdate") {
-    colors = message.status;
-  } else if (message.command == "undoRedo") {
-    if (message.status == "undo") {
-      undoPath();
-    } else {
-      redoPath();
-    }
-  } else if (message.command == "clearBoard") {
-    clearBoard();
-  }
-  return true;
+  annotationActions[message.command].apply(null,message.status);
 })

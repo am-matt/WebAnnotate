@@ -13,11 +13,16 @@ const undoButton = $("undoButton");
 const redoButton = $("redoButton");
 const clearBoardButton = $("clearBoardButton");
 const settingsButton = $("settingsButton");
-var defaultColors = ["#FF0000","#00FF00","#0000FF"] // TO BE REPLACED WITH SETTINGS MENU UPDATE
+var defaultColors = ["#FF0000","#00FF00","#0000FF"] // gets replaced by settings anyways
 var colors = [];
 var colorsString = [];
 var mode = cursorButton;
 var colorAdd = "new"
+
+/*
+annotationActions = [openclose,updateStatus,save,load,maximizeToolbox,minimizeToolbox,updatePenSize,
+  newColor,updateColors,undoPath,redoPath,clearBoard]
+*/
 
 // CSS styles return rgba(r,g,b) format by default but this program uses hex to store colors
 function RGBAToHexA(rgba, forceRemoveAlpha = false) {
@@ -40,12 +45,10 @@ colorSelector.addEventListener("change", () => {
             if (b.classList.contains("selected")) {
                 const oldColor = RGBAToHexA(b.style.backgroundColor).toUpperCase();
                 const i = colorsString.indexOf(oldColor);
-                console.log(colorsString);
-                console.log(i);
                 b.style.backgroundColor = colorSelector.value;
                 colorsString[i] = b.style.backgroundColor;
-                updateStatus("newColor", b.style.backgroundColor);
-                updateStatus("colorUpdate",colorsString);
+                updateStatus("newColor", [b.style.backgroundColor]); 
+                updateStatus("colorUpdate",[colorsString]);
                 colorAdd = "new";
             }
         })
@@ -62,7 +65,7 @@ function addNewColor(color) {
     colorsString.push(color);
     colorOptions.appendChild(newButton);
     colorPressed(newButton);
-    updateStatus("colorUpdate",colorsString);
+    updateStatus("colorUpdate",[colorsString]);
 }
 
 function removeColor(e) {
@@ -78,7 +81,7 @@ function removeColor(e) {
         colors.splice(i,1);
         b.remove();
         if (switchColors) { colorPressed(colors[0]); }
-        updateStatus("colorUpdate",colorsString);
+        updateStatus("colorUpdate",[colorsString]);
     }
     return false;
 }
@@ -95,51 +98,51 @@ function onColorButtonPress(e) {
 function colorPressed(b) {
     colors.forEach((c) => { c.classList.remove("selected"); })
     b.classList.add("selected");
-    updateStatus("newColor", b.style.backgroundColor);
+    updateStatus("newColor",[b.style.backgroundColor]);
 }
 
 // Mode Switching
 
 sizeSlider.addEventListener("change", () => {
-    updateStatus("resize", sizeSlider.value);
+    updateStatus("updatePenSize", [sizeSlider.value]);
 })
 
-menu.addEventListener("onmouseenter", () => {
+/*menu.addEventListener("onmouseenter", () => {
     updateStatus("changeMenu","in");
 })
 
 menu.addEventListener("onmouseleave", () => {
     updateStatus("changeMenu", "out");
-})
+})*/
 
 cursorButton.addEventListener("click", () => {
-    updateStatus("updateStatus","cursor",cursorButton)
+    updateStatus("updateStatus",args=["cursor"],reason="updateStatus",cursorButton)
 })
 
 drawButton.addEventListener("click", () => {
-    updateStatus("updateStatus","draw",drawButton)
+    updateStatus("updateStatus",args=["draw"],reason="updateStatus",drawButton)
 })
 
 eraseButton.addEventListener("click", () => {
-    updateStatus("updateStatus","erase",eraseButton)
+    updateStatus("updateStatus",args=["erase"],reason="updateStatus",eraseButton)
 })
 
 // Action Buttons
 
 saveButton.addEventListener("click", () => {
-    updateStatus("saveLoad","save");
+    updateStatus("save");
 })
 
 loadButton.addEventListener("click", () => {
-    updateStatus("saveLoad","load");
+    updateStatus("load");
 })
 
 undoButton.addEventListener("click", () => {
-    updateStatus("undoRedo", "undo");
+    updateStatus("undoPath");
 })
 
 redoButton.addEventListener("click", () => {
-    updateStatus("undoRedo", "redo");
+    updateStatus("redoPath");
 })
 
 clearBoardButton.addEventListener("click", () => {
@@ -157,34 +160,37 @@ settingsButton.addEventListener("click", () => {
 document.addEventListener('keydown', keyPressHandler);
 function keyPressHandler(e) {
       if (e.ctrlKey && e.shiftKey && e.keyCode == 90) {
-        updateStatus("undoRedo","redo");
+        updateStatus("redoPath");
       }
       else if (e.ctrlKey && e.keyCode == 90) {
-        updateStatus("undoRedo","undo");
+        updateStatus("undoPath");
       }
 }
 
-function updateStatus(command, status=null, button) {
-    if (command == "updateStatus") {
+function updateStatus(command, args=null, reason=null, button=null) {
+    if (reason == "updateStatus") {
         mode.classList.remove("selected");
         button.classList.add("selected");
         mode = button;
     }
-    browser.runtime.sendMessage({command:command,status:status})
+    browser.runtime.sendMessage({command:command,status:args})
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const getSettings = browser.storage.local.get("settings");
+    getSettings.then((data) => {
+        defaultColors = data["settings"][0]["colors"];
+    })
     defaultColors.forEach((c) => {
         addNewColor(c);
     })
 })
 
 window.addEventListener("message", (e) => {
-    console.log(e.data);
     e.data.forEach((c) => {
-        console.log(c);
         if (!colorsString.includes(c)) {
             addNewColor(c);
         }
     });
 })
+

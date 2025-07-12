@@ -3,7 +3,7 @@ function onError(error) {
   }
 
 function openclose(tabs) {
-    browser.tabs.sendMessage(tabs[0].id, "ext-openclose");
+    browser.tabs.sendMessage(tabs[0].id, {command: "openclose"});
 }
 
 browser.tabs.onUpdated.addListener(function(tabId, changeInfo) {
@@ -31,5 +31,20 @@ browser.runtime.onMessage.addListener((message,sender) => {
     } else {
         browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
     }
-    
+})
+
+// Data Stuff
+const getSettings = browser.storage.local.get("settings");
+getSettings.then((data) => {
+    console.log(data);
+    if (Object.keys(data) == 0) {
+        // create new settings data
+        console.log("CREATING NEW SETTINGS DATA (with default settings)");
+        const default_settings = {
+            colors: ["#FF0000","#00FF00","#0000FF"],
+            autoSave: true,
+            maxUndo: 20,
+        }
+        browser.storage.local.set({settings:[default_settings]});
+    }
 })
