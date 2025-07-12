@@ -2,6 +2,8 @@ $ = (e) => {return document.getElementById(e);}
 const dataTable = $("dataTable");
 const totalUsageText = $("totalStorage");
 
+// Data Storage Manager //
+
 function round(num,place) {
     return +num.toFixed(place);
 }
@@ -81,7 +83,8 @@ getStorage.then((data) => {
 
 
 
-// graciously borrowed code from toolbox.js
+// Color Preset Setting //
+
 var defaultColors = ["#FF0000","#00FF00","#0000FF"] // gets replaced by settings anyways
 const colorOptions = $("colorButtons");
 const colorSelector = $("colorSelector");
@@ -108,15 +111,15 @@ colorSelector.addEventListener("change", () => {
     } else {
         colors.forEach((b) => {
             if (b.classList.contains("selected")) {
+                console.log("FOUND SELECTED");
                 const oldColor = RGBAToHexA(b.style.backgroundColor).toUpperCase();
                 const i = colorsString.indexOf(oldColor);
-                console.log(colorsString);
-                console.log(i);
-                b.style.backgroundColor = RGBAToHexA(colorSelector.value).toUpperCase();
+                b.style.backgroundColor = colorSelector.value;
                 colorsString[i] = RGBAToHexA(b.style.backgroundColor).toUpperCase();
                 colorAdd = "new";
                 b.classList.remove("selected");
                 updateColorsSetting();
+                updateStorage();
             }
         })
     }
@@ -132,17 +135,19 @@ function addNewColor(color) {
     colorsString.push(color);
     colorOptions.appendChild(newButton);
     updateColorsSetting();
+    updateStorage();
 }
 
 function removeColor(e) {
     if (colors.length > 1) {
         b = e.target;
-        const y = colorsString.indexOf(b.style.backgroundColor);
+        const y = colorsString.indexOf(RGBAToHexA(b.style.backgroundColor).toUpperCase());
         colorsString.splice(y,1);
         const i = colors.indexOf(b);
         colors.splice(i,1);
         b.remove();
         updateColorsSetting();
+        updateStorage();
     }
     return false;
 }
@@ -167,8 +172,6 @@ function updateColorsSetting() {
     const getSettings = browser.storage.local.get("settings");
     getSettings.then((data) => {
         data["settings"][0]["colors"] = colorsString;
-        console.log(data["settings"][0]["colors"]);
-        console.log("updating colors")
         const update = browser.storage.local.set({settings:data["settings"]});
         update.then(() => { console.log("update complete "); })
     })
@@ -177,7 +180,6 @@ function updateColorsSetting() {
 document.addEventListener("DOMContentLoaded", () => {
     const getSettings = browser.storage.local.get("settings");
     getSettings.then((data) => {
-        console.log(data["settings"][0]["colros"]);
         defaultColors = data["settings"][0]["colors"];
         defaultColors.forEach((c) => {
             addNewColor(c);

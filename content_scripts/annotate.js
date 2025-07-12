@@ -83,6 +83,8 @@ function loadToolbox() {
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener('keydown', keyPressHandler);
+
+    updateUndoStack();
   } else {
     toolbox.style.visibility = "visible";
     canvas.style.visibility = "visible";
@@ -104,7 +106,7 @@ function removePathFromStack(stack) {
 }
 
 function undoPath() {
-  if (!undoredoAction && saveStates.length != 0) {
+  if (!undoredoAction && saveStates.length > 1) {
     console.log("undoing");
     undoredoAction = true;
     redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
@@ -237,6 +239,7 @@ function load() {
     image.onload = () => {
       ctx.clearRect(0,0,canvas.width,canvas.height);
       ctx.drawImage(image,0,0)
+      updateUndoStack();
       console.log("LOADED");
     }
     image.src = imageData;
@@ -253,10 +256,6 @@ function maximizeToolbox() {
 
 function onError(e) {
   console.log(e);
-}
-
-function theTestFunction() {
-  alert("I WAS ALERTED");
 }
 
 /*window.onresize = () => {

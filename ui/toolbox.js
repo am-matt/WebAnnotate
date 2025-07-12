@@ -180,10 +180,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const getSettings = browser.storage.local.get("settings");
     getSettings.then((data) => {
         defaultColors = data["settings"][0]["colors"];
+        defaultColors.forEach((c) => {
+            addNewColor(c);
+        })
     })
-    defaultColors.forEach((c) => {
-        addNewColor(c);
-    })
+    
 })
 
 window.addEventListener("message", (e) => {

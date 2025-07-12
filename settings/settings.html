@@ -7,10 +7,22 @@
     <title>WebAnnotate Settings</title>
 </head>
     <body>
-        <p>Settings</p>
+        <h1>Settings</h1>
 
-        <h3>Total usage:</h3>
-        <p id="totalStorage"></p>
+        <div id="colors">
+            <h3 id="colorLabel">Default color presets:</h3>
+            <div id="colorSelection">
+                <div id="colorButtons">
+                </div>
+                <div id="addNewColorButton">
+                    +
+                    <input type="color" id="colorSelector">
+                </div>
+            </div>
+        </div>
+
+        <h3>Storage manager:</h3>
+        <p>Total storage used: <span id="totalStorage"></span></p>
 
         <table id="dataTable">
             <tr>
@@ -21,16 +33,6 @@
             </tr>
         </table>
 
-        <div id="colors">
-            <p  id="colorLabel">Default color presets</p>
-            <div id="colorSelection">
-                <div id="colorButtons">
-                </div>
-                <div id="addNewColorButton">
-                    +
-                    <input type="color" id="colorSelector">
-                </div>
-            </div>
-        </div>
+
     </body>
 </html>
