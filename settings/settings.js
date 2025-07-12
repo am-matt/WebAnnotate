@@ -1,6 +1,9 @@
 $ = (e) => {return document.getElementById(e);}
+const autoSaveCheck = $("autoSaveCheck");
+const maxUndo = $("maxUndoNum");
 const dataTable = $("dataTable");
 const totalUsageText = $("totalStorage");
+const maxUndoWarningLabel = $("memoryWarning")
 
 // Data Storage Manager //
 
@@ -177,13 +180,52 @@ function updateColorsSetting() {
     })
 }
 
+// General Settings Management //
+
+function autoSaveChanged(e) {
+    const getSettings = browser.storage.local.get("settings");
+    getSettings.then((data) => {
+        data["settings"][0]["autoSave"] = e.target.matches(":checked");
+        const update = browser.storage.local.set({settings:data["settings"]});
+        update.then(() => { console.log("updated autosave"); })
+    })
+}
+
+function maxUndoChanged(e) {
+    const getSettings = browser.storage.local.get("settings");
+    getSettings.then((data) => {
+        data["settings"][0]["maxUndo"] = e.target.value;
+        const update = browser.storage.local.set({settings:data["settings"]});
+        update.then(() => { console.log("updated max undo"); })
+        if (e.target.value > 100) {
+            maxUndoWarningLabel.hidden = false;
+        } else {
+            maxUndoWarningLabel.hidden = true;
+        }
+    })
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const getSettings = browser.storage.local.get("settings");
     getSettings.then((data) => {
+        const autoSaveSetting = data["settings"][0]["autoSave"];
+        const maxUndoSetting = data["settings"][0]["maxUndo"];
+
+        autoSaveCheck.checked = autoSaveSetting;
+        maxUndo.value = maxUndoSetting;
+
+        if (maxUndo.value > 100) {
+            maxUndoWarningLabel.hidden = false;
+        } else {
+            maxUndoWarningLabel.hidden = true;
+        }
+
+        autoSaveCheck.addEventListener("input", autoSaveChanged);
+        maxUndo.addEventListener("input", maxUndoChanged);
+
         defaultColors = data["settings"][0]["colors"];
         defaultColors.forEach((c) => {
             addNewColor(c);
         })
     })
-    
 })

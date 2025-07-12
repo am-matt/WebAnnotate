@@ -6,14 +6,15 @@ var canvas;
 var ctx;
 var mode = "cursor";
 var prevX, prevY
-var undoRedoCap = 10; // TEMPORARY, REPLACE WHEN SETTINGS IS IMPLEMENTED
-var penWidth = 10; // TEMPORARY, REPLACE WHEN TOOLBOX IS FULLY IMPLEMENTED
+var undoRedoCap = 10;
+var penWidth = 5;
 var opened = false;
 var undoredoAction = false;
 var saveStack = [];
 var currentPoints = [];
 var color = "rgba(255,0,0,1)";
 var colors = [];
+var autosave = false;
 
 var saveStates = [];
 var redoStates = [];
@@ -76,6 +77,15 @@ function loadToolbox() {
     document.head.appendChild(stylesheet);
     iframe.style.visibility = "visible";
     toolbox = iframe;
+
+    // Load settings
+    const getSettings = browser.storage.local.get("settings");
+    getSettings.then((data) => {
+        const autoSaveSetting = data["settings"][0]["autoSave"];
+        const maxUndoSetting = data["settings"][0]["maxUndo"];
+        autosave = autoSaveSetting;
+        undoRedoCap = maxUndoSetting;
+    });
 
     //document.addEventListener("click", handleClickEvent);
     document.addEventListener("contextmenu", noContext);
@@ -154,6 +164,8 @@ function onMouseUp(e) {
       erase(e.pageX,e.pageY);
     }
     updateUndoStack();
+
+    if (autosave) { save(); }
   }
 }
 
@@ -163,7 +175,7 @@ function updateUndoStack() {
   if (redoStates.length > 0) {
     redoStates = [];
   }
-  if (saveStates.length > undoRedoCap) {
+  if (saveStates.length > undoRedoCap+1) {
     saveStates.shift();
   }
 }

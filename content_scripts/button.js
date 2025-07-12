@@ -43,7 +43,7 @@ getSettings.then((data) => {
         const default_settings = {
             colors: ["#FF0000","#00FF00","#0000FF"],
             autoSave: true,
-            maxUndo: 20,
+            maxUndo: 50,
         }
         browser.storage.local.set({settings:[default_settings]});
     }

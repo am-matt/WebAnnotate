@@ -9,6 +9,22 @@
     <body>
         <h1>Settings</h1>
 
+        <div id="general">
+            <h3>General:</h3>
+            <label for="autoSaveCheck">Auto-Save</label>
+            <input type="checkbox" id="autoSaveCheck">
+            <br>
+            <label for="maxUndoNum">Max Undo</label>
+            <select name="maxUndoNum" id="maxUndoNum">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+            </select>
+            <label for="maxUndoNum" hidden="true" id="memoryWarning">(Higher max undo not recommended for low memory systems)</label>
+        </div>
+
         <div id="colors">
             <h3 id="colorLabel">Default color presets:</h3>
             <div id="colorSelection">
@@ -20,6 +36,8 @@
                 </div>
             </div>
         </div>
+
+        <p>Settings will take effect after refreshing the toolbox</p>
 
         <h3>Storage manager:</h3>
         <p>Total storage used: <span id="totalStorage"></span></p>
