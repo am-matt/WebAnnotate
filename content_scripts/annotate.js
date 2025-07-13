@@ -112,6 +112,13 @@ function loadToolbox() {
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener('keydown', keyPressHandler);
 
+    toolbox.addEventListener("mouseout", () => {
+      cursor.style.visibility = "visible"
+    })
+    toolbox.addEventListener("mouseover", () => {
+      cursor.style.visibility = "hidden";
+    })
+
     load();
     updateUndoStack();
   } else {
@@ -265,7 +272,6 @@ function erase(x,y) {
 
 function updatePenSize(penSize) {
   penWidth = penSize;
-  updateCursor();
 }
 
 function clearBoard() {
