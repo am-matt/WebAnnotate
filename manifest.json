@@ -9,7 +9,7 @@
       "48": "icons/pen-48.png"
     },
   
-    "permissions": ["<all_urls>","activeTab","tabs","scripting", "storage","unlimitedStorage"],
+    "permissions": ["<all_urls>","activeTab","tabs","scripting", "storage","unlimitedStorage","contextMenus"],
   
     "browser_action": {
       "default_icon": "icons/pen-48.png",

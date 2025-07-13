@@ -33,6 +33,20 @@ browser.runtime.onMessage.addListener((message,sender) => {
     }
 })
 
+browser.contextMenus.create(
+    {
+        id: "open-ext-settings",
+        title: "WebAnnotate Settings",
+        contexts: ["browser_action"],
+        onclick: () => {
+            var createData = {
+                url: "settings/settings.html",
+            };
+            var creating = browser.tabs.create(createData);
+        }
+    }
+)
+
 // Data Stuff
 const getSettings = browser.storage.local.get("settings");
 getSettings.then((data) => {

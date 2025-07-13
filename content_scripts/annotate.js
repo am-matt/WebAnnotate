@@ -4,6 +4,7 @@ const webPath = window.location.href.split('?')[0];
 var toolbox;
 var canvas;
 var ctx;
+var cursor;
 var mode = "cursor";
 var prevX, prevY
 var undoRedoCap = 10;
@@ -34,6 +35,7 @@ function hideToolBox() {
   if (toolbox) {
     toolbox.style.visibility = "hidden";
     canvas.style.visibility = "hidden";
+    cursorCanvas.style.visibility = "hidden";
   }
 }
 
@@ -61,6 +63,22 @@ function loadToolbox() {
     canvas.style.position = "absolute";
     canvas.style.cursor = "crosshair";
     canvas.inert = true;
+
+    cursor = document.createElement("div");
+    cursor.style.all = "initial";
+    cursor.id = "webannotate-cursor";
+    cursor.style.position = "fixed";
+    cursor.style.transform = "translate(-50%,-50%)";
+    cursor.style.transformOrigin = "top left";
+    cursor.style.height = "32px";
+    cursor.style.width = "32px";
+    cursor.style.borderRadius = "32px";
+    cursor.style.border = "solid black 2px";
+    cursor.style.filter = "invert(1)";
+    cursor.style.mixBlendMode = "difference";
+    cursor.inert = true;
+    cursor.style.zIndex = canvas.style.zIndex + 1;
+    document.body.append(cursor);
     
     const stylesheet = document.createElement("style");
     stylesheet.textContent = `
@@ -94,10 +112,12 @@ function loadToolbox() {
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener('keydown', keyPressHandler);
 
+    load();
     updateUndoStack();
   } else {
     toolbox.style.visibility = "visible";
     canvas.style.visibility = "visible";
+    cursorCanvas.style.visibility = "visible";
   }
 }
 
@@ -125,6 +145,9 @@ function undoPath() {
       if (saveStates.length > 0) {
         ctx.putImageData(saveStates[saveStates.length-1],0,0);
       }
+      if (autosave) {
+        save();
+      }
       undoredoAction = false;
     })
   }
@@ -140,6 +163,9 @@ function redoPath() {
       ctx.putImageData(p,0,0);
       undoredoAction = false;
     })
+    if (autosave) {
+      save();
+    }
   } else {
     console.log("not redoing it :(");
   }
@@ -189,10 +215,25 @@ function updateUndoStack() {
 }*/
 
 function handleMouseMoveEvent(e) {
+  updateCursor(e);
   if (mode == "draw" && e.buttons == 1) {
     draw(e.pageX,e.pageY);
   } else if (mode == "erase" && e.buttons == 1) {
     erase(e.pageX,e.pageY);
+  }
+}
+
+function updateCursor(e) {
+  cursor.style.height = penWidth + "px";
+  cursor.style.width = penWidth + "px";
+  cursor.style.borderRadius = penWidth + "px";
+  cursor.style.left = e.clientX + "px";
+  cursor.style.top = e.clientY + "px";
+
+  if (mode == "cursor") {
+    cursor.style.opacity = 0;
+  } else {
+    cursor.style.opacity = 1;
   }
 }
 
@@ -224,6 +265,7 @@ function erase(x,y) {
 
 function updatePenSize(penSize) {
   penWidth = penSize;
+  updateCursor();
 }
 
 function clearBoard() {
