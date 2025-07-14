@@ -101,6 +101,20 @@ function colorPressed(b) {
     updateStatus("newColor",[b.style.backgroundColor]);
 }
 
+menu.addEventListener("mousedown", (e) => {
+    const nodrag = Array.from(document.getElementsByClassName("nodrag"));
+    var draggable = true;
+    for (const i in nodrag) {
+        if (nodrag[i].matches(":hover")) {
+            draggable = false;
+            break;
+        }
+    }
+    if (draggable) {
+        console.log("dragging time");
+    }
+})
+
 // Mode Switching
 
 sizeSlider.addEventListener("change", () => {

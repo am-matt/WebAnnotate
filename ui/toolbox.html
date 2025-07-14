@@ -10,27 +10,27 @@
     <body>
         <div id="menu">
             <div id="quickActions">
-                <button id="undoButton" class="quickButton"><i class="fi fi-ss-undo"></i></button>
-                <button id="redoButton" class="quickButton"><i class="fi fi-ss-redo"></i></button>
+                <button id="undoButton" class="quickButton nodrag"><i class="fi fi-ss-undo"></i></button>
+                <button id="redoButton" class="quickButton nodrag"><i class="fi fi-ss-redo"></i></button>
             </div>
 
             <div id="statusButtons">
-                <button id="cursor-button" class="statusButton selected"><i class="fi fi-ss-location-arrow"></i></button>
-                <button id="draw-button" class="statusButton"><i class="fi fi-ss-attribution-pencil"></i></button>
-                <button id="erase-button" class="statusButton"><i class="fi fi-ss-eraser"></i></button>
+                <button id="cursor-button" class="statusButton selected nodrag"><i class="fi fi-ss-location-arrow"></i></button>
+                <button id="draw-button" class="statusButton nodrag"><i class="fi fi-ss-attribution-pencil"></i></button>
+                <button id="erase-button" class="statusButton nodrag"><i class="fi fi-ss-eraser"></i></button>
             </div>
 
             <div id="strokeSize">
                 <label inert for="sizeSlider" class="label">Stroke Size</label>
-                <input type="range" min="1" max="100" value="10" class="slider" id="sizeSlider" class="slider">
+                <input type="range" min="1" max="100" value="10" class="slider nodrag" id="sizeSlider">
             </div>
 
             <div id="colors">
                 <p inert id="colorLabel">Color select</p>
                 <div id="colorSelection">
-                    <div id="colorButtons">
+                    <div id="colorButtons" class="nodrag">
                     </div>
-                    <div id="addNewColorButton">
+                    <div id="addNewColorButton" class="nodrag">
                         +
                         <input type="color" id="colorSelector">
                     </div>
@@ -38,13 +38,13 @@
             </div>
 
             <div id="saveButtons">
-                <button id="save-button">Save</button>
-                <button id="load-button">Load</button>
+                <button id="save-button" class="nodrag">Save</button>
+                <button id="load-button" class="nodrag">Load</button>
             </div>
 
             <div id="footerButtons">
-                <button id="clearBoardButton" class="quickButton"><i class="fi fi-ss-trash-xmark"></i></button>
-                <button id="settingsButton" class="quickButton"><i class="fi fi-ss-settings"></i></button>
+                <button id="clearBoardButton" class="quickButton nodrag"><i class="fi fi-ss-trash-xmark"></i></button>
+                <button id="settingsButton" class="quickButton nodrag"><i class="fi fi-ss-settings"></i></button>
             </div>
 
 
