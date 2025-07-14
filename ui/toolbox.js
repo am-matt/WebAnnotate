@@ -18,6 +18,7 @@ var colors = [];
 var colorsString = [];
 var mode = cursorButton;
 var colorAdd = "new"
+var dragMode = false;
 
 /*
 annotationActions = [openclose,updateStatus,save,load,maximizeToolbox,minimizeToolbox,updatePenSize,
@@ -111,7 +112,18 @@ menu.addEventListener("mousedown", (e) => {
         }
     }
     if (draggable) {
-        console.log("dragging time");
+        dragMode = true;
+        menu.style.cursor = "grabbing";
+        menu.setPointerCapture(e.pointerId);
+        updateStatus("dragToolbox",args=[e.pointerId]);
+    }
+})
+
+menu.addEventListener("mouseup", (e) => {
+    if (dragMode) {
+        dragMode = false;
+        menu.style.cursor = "default";
+        menu.releasePointerCapture(e.pointerId);
     }
 })
 

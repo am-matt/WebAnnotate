@@ -43,13 +43,9 @@ function hideToolBox() {
 function loadToolbox() {
   if (!toolbox) {
     console.log("loading toolbox....")
-    const div = document.createElement("div");
-    div.className = 'ext-toolbox';
     const iframe = document.createElement("iframe");
-    iframe.className = 'ext-toolbox';
+    iframe.id = 'ext-toolbox';
     iframe.src = browser.extension.getURL("ui/toolbox.html");
-    div.appendChild(iframe);
-    document.body.append(div);
     canvas = document.createElement("canvas");
     ctx = canvas.getContext("2d");
     document.body.append(canvas);
@@ -64,6 +60,7 @@ function loadToolbox() {
     canvas.style.position = "absolute";
     canvas.style.cursor = "none";
     canvas.inert = true;
+    document.body.append(iframe);
 
     cursor = document.createElement("div");
     cursor.style.all = "initial";
@@ -83,7 +80,7 @@ function loadToolbox() {
     
     const stylesheet = document.createElement("style");
     stylesheet.textContent = `
-        .ext-toolbox {
+        #ext-toolbox {
           all: initial;
           position: fixed;
           top: 15px;
@@ -361,6 +358,20 @@ function updateColors(newColors) {
   colors = newColors;
 }
 
+function dragToolbox(pointerId) {
+  
+  /*const dragDiv = document.createElement("div");
+  dragDiv.style.position = "fixed";
+  dragDiv.style.height = "100%";
+  dragDiv.style.width = "100%";
+  dragDiv.style.top = "0px";
+  dragDiv.style.left = "0px";
+  dragDiv.style.zIndex = canvas.style.zIndex + 2;
+  dragDiv.style.cursor = "grabbing";
+  document.body.append(dragDiv);
+  dragDiv.setPointerCapture(pointerId);*/
+}
+
 annotationActions = {
   "openclose":openclose,
   "updateStatus":updateStatus,
@@ -373,7 +384,8 @@ annotationActions = {
   "colorUpdate": updateColors,
   "undoPath": undoPath,
   "redoPath": redoPath, 
-  "clearBoard": clearBoard
+  "clearBoard": clearBoard,
+  "dragToolbox": dragToolbox
 }
 
 browser.runtime.onMessage.addListener((message) => {
