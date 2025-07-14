@@ -17,6 +17,7 @@ var color = "rgba(255,0,0,1)";
 var colors = [];
 var autosave = false;
 var changes = false;
+var cursorType = "circle";
 
 var saveStates = [];
 var redoStates = [];
@@ -36,7 +37,6 @@ function hideToolBox() {
   if (toolbox) {
     toolbox.style.visibility = "hidden";
     canvas.style.visibility = "hidden";
-    cursorCanvas.style.visibility = "hidden";
   }
 }
 
@@ -62,7 +62,7 @@ function loadToolbox() {
     canvas.style.top = 0;
     canvas.style.left = 0;
     canvas.style.position = "absolute";
-    canvas.style.cursor = "crosshair";
+    canvas.style.cursor = "none";
     canvas.inert = true;
 
     cursor = document.createElement("div");
@@ -102,8 +102,17 @@ function loadToolbox() {
     getSettings.then((data) => {
         const autoSaveSetting = data["settings"][0]["autoSave"];
         const maxUndoSetting = data["settings"][0]["maxUndo"];
+        const cursorTypeSetting = data["settings"][0]["cursor"];
         autosave = autoSaveSetting;
         undoRedoCap = maxUndoSetting;
+        cursorType = cursorTypeSetting;
+        if (cursorType == "crosshair" || cursorType == "both") {
+          console.log("settin ccanvas cursor");
+          canvas.style.cursor = "crosshair";
+        }
+        if (cursorType == "crosshair") {
+          cursor.style.visibility = "hidden";
+        }
     });
 
     //document.addEventListener("click", handleClickEvent);
@@ -122,7 +131,10 @@ function loadToolbox() {
     })
 
     toolbox.addEventListener("mouseout", () => {
-      cursor.style.visibility = "visible"
+      if (cursorType != "crosshair") {
+        cursor.style.visibility = "visible";
+      }
+      
     })
     toolbox.addEventListener("mouseover", () => {
       cursor.style.visibility = "hidden";
@@ -133,7 +145,6 @@ function loadToolbox() {
   } else {
     toolbox.style.visibility = "visible";
     canvas.style.visibility = "visible";
-    cursorCanvas.style.visibility = "visible";
   }
 }
 

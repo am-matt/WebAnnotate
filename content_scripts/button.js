@@ -58,6 +58,7 @@ getSettings.then((data) => {
             colors: ["#FF0000","#00FF00","#0000FF"],
             autoSave: true,
             maxUndo: 50,
+            cursor: "circle"
         }
         browser.storage.local.set({settings:[default_settings]});
     }

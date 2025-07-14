@@ -4,6 +4,7 @@ const maxUndo = $("maxUndoNum");
 const dataTable = $("dataTable");
 const totalUsageText = $("totalStorage");
 const maxUndoWarningLabel = $("memoryWarning")
+const cursorType = $("cursorType")
 
 // Data Storage Manager //
 
@@ -205,14 +206,26 @@ function maxUndoChanged(e) {
     })
 }
 
+function cursorChanged(e) {
+    const getSettings = browser.storage.local.get("settings");
+    getSettings.then((data) => {
+        console.log(e.target.value);
+        data["settings"][0]["cursor"] = e.target.value;
+        const update = browser.storage.local.set({settings:data["settings"]});
+        update.then(() => { console.log("updated cursor settings"); })
+    })
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const getSettings = browser.storage.local.get("settings");
     getSettings.then((data) => {
         const autoSaveSetting = data["settings"][0]["autoSave"];
         const maxUndoSetting = data["settings"][0]["maxUndo"];
+        const cursorSetting = data["settings"][0]["cursor"];
 
         autoSaveCheck.checked = autoSaveSetting;
         maxUndo.value = maxUndoSetting;
+        cursorType.value = cursorSetting;
 
         if (maxUndo.value > 100) {
             maxUndoWarningLabel.hidden = false;
@@ -222,6 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         autoSaveCheck.addEventListener("input", autoSaveChanged);
         maxUndo.addEventListener("input", maxUndoChanged);
+        cursorType.addEventListener("input", cursorChanged);
 
         defaultColors = data["settings"][0]["colors"];
         defaultColors.forEach((c) => {
