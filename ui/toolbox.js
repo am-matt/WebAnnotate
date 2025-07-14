@@ -115,7 +115,12 @@ menu.addEventListener("mousedown", (e) => {
         dragMode = true;
         menu.style.cursor = "grabbing";
         menu.setPointerCapture(e.pointerId);
-        updateStatus("dragToolbox",args=[e.pointerId]);
+    }
+})
+
+menu.addEventListener("mousemove", (e) => {
+    if (dragMode) {
+        updateStatus("dragToolbox", args=[e.movementX,e.movementY]);
     }
 })
 

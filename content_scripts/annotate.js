@@ -358,18 +358,9 @@ function updateColors(newColors) {
   colors = newColors;
 }
 
-function dragToolbox(pointerId) {
-  
-  /*const dragDiv = document.createElement("div");
-  dragDiv.style.position = "fixed";
-  dragDiv.style.height = "100%";
-  dragDiv.style.width = "100%";
-  dragDiv.style.top = "0px";
-  dragDiv.style.left = "0px";
-  dragDiv.style.zIndex = canvas.style.zIndex + 2;
-  dragDiv.style.cursor = "grabbing";
-  document.body.append(dragDiv);
-  dragDiv.setPointerCapture(pointerId);*/
+function dragToolbox(x,y) {
+  toolbox.style.left = parseInt(getComputedStyle(toolbox).left.replace('px','')) + x + 'px';
+  toolbox.style.top = parseInt(getComputedStyle(toolbox).top.replace('px','')) + y + 'px';
 }
 
 annotationActions = {
