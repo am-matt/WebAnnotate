@@ -16,6 +16,7 @@ var currentPoints = [];
 var color = "rgba(255,0,0,1)";
 var colors = [];
 var autosave = false;
+var changes = false;
 
 var saveStates = [];
 var redoStates = [];
@@ -112,6 +113,14 @@ function loadToolbox() {
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener('keydown', keyPressHandler);
 
+    addEventListener("beforeunload", (e) => {
+      if (autosave) {
+        save();
+      } else if (changes) {
+        e.preventDefault();
+      }
+    })
+
     toolbox.addEventListener("mouseout", () => {
       cursor.style.visibility = "visible"
     })
@@ -152,11 +161,9 @@ function undoPath() {
       if (saveStates.length > 0) {
         ctx.putImageData(saveStates[saveStates.length-1],0,0);
       }
-      if (autosave) {
-        save();
-      }
       undoredoAction = false;
     })
+    changes = true;
   }
 }
 
@@ -170,9 +177,7 @@ function redoPath() {
       ctx.putImageData(p,0,0);
       undoredoAction = false;
     })
-    if (autosave) {
-      save();
-    }
+    changes = true;
   } else {
     console.log("not redoing it :(");
   }
@@ -196,9 +201,8 @@ function onMouseUp(e) {
     } else if (mode == "erase") {
       erase(e.pageX,e.pageY);
     }
+    changes = true;
     updateUndoStack();
-
-    if (autosave) { save(); }
   }
 }
 
@@ -286,6 +290,7 @@ async function save() {
   const save = browser.storage.local.set({[webPath]:[[canvasData,colors]]});
   save.then(() => {
     console.log("SAVED");
+    changes = false;
   }, onError)
 }
 
