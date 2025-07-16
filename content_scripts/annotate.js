@@ -193,6 +193,7 @@ function redoPath() {
 
 function onMouseDown(e) {
   if (mode == "draw" || mode == "erase") {
+    canvas.setPointerCapture(e.pointerId);
     ctx.strokeStyle = color;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
@@ -204,6 +205,7 @@ function onMouseDown(e) {
 
 function onMouseUp(e) {
   if ((mode == "draw" || mode == "erase") && e.button == 0 && canvas.matches(":hover")) {
+    canvas.releasePointerCapture(e.pointerId);
     if (mode == "draw") {
       draw(e.pageX,e.pageY);
     } else if (mode == "erase") {
