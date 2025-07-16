@@ -129,6 +129,7 @@ menu.addEventListener("mouseup", (e) => {
         dragMode = false;
         menu.style.cursor = "default";
         menu.releasePointerCapture(e.pointerId);
+        updateStatus("setToolboxPos");
     }
 })
 

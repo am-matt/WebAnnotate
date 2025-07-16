@@ -361,8 +361,74 @@ function updateColors(newColors) {
 }
 
 function dragToolbox(x,y) {
+  toolbox.style.transition = "none";
   toolbox.style.left = parseInt(getComputedStyle(toolbox).left.replace('px','')) + x + 'px';
   toolbox.style.top = parseInt(getComputedStyle(toolbox).top.replace('px','')) + y + 'px';
+}
+
+function getDistance(x1,y1,x2,y2) {
+  return Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+}
+
+function setToolboxPos() {
+  var margin = 15;
+  var newX;
+  var newY;
+  var menuWidth = toolbox.clientWidth;
+  var menuHeight = toolbox.clientHeight;
+  var currentX = parseInt(getComputedStyle(toolbox).left.replace('px','')) + (menuWidth/2);
+  var currentY = parseInt(getComputedStyle(toolbox).top.replace('px','')) + (menuHeight/2);
+  var viewportWidth = window.innerWidth;
+  var viewportHeight = window.innerHeight;
+  var centerX = viewportWidth / 2;
+  var centerY = viewportHeight / 2;
+  var xFromCenter = Math.abs(centerX - currentX);
+  var yFromCenter = Math.abs(centerY - currentY);
+
+  var xToWall = xFromCenter/viewportWidth;
+  var yToWall = yFromCenter/viewportHeight;
+  var cornerPercent = xToWall+yToWall;
+
+  if (cornerPercent > 0.6) {
+    var topLeft = getDistance(currentX,currentY,0,0);
+    var topRight = getDistance(currentX,currentY,viewportWidth-menuWidth,0);
+    var bottomLeft = getDistance(currentX,currentY,0,viewportHeight-menuHeight);
+    var bottomRight = getDistance(currentX,currentY,viewportWidth-menuWidth,viewportHeight-menuHeight);
+    var closestCorner = Math.min(topLeft,topRight,bottomLeft,bottomRight);
+    // not the cleanest implementation..
+    if (closestCorner == topLeft) {
+      newX = margin + "px";
+      newY = margin + "px";
+    } else if (closestCorner == topRight) {
+      newX = (viewportWidth - margin - menuWidth) + "px";
+      newY = margin + "px";
+    } else if (closestCorner == bottomLeft) {
+      newX = margin + "px";
+      newY = (viewportHeight - margin - menuHeight) + "px";
+    } else {
+      newX = (viewportWidth - margin - menuWidth) + "px";
+      newY = (viewportHeight - margin - menuHeight) + "px";
+    }
+  } else {
+    //determine whether to stick to x or y plane
+    if (xToWall > yToWall) {
+      if (currentX < (0.5)*viewportWidth) {
+        newX = margin + "px";
+      } else {
+        newX = (viewportWidth - margin - menuWidth) + "px";
+      }
+    } else {
+      if (currentY < (0.5)*viewportHeight) {
+        newY = margin + "px";
+      } else {
+        newY = (viewportHeight - margin - menuHeight) + "px";
+      }
+    }
+  }
+
+  toolbox.style.transition = "all 0.2s ease-out";
+  toolbox.style.left = newX;
+  toolbox.style.top = newY;
 }
 
 annotationActions = {
@@ -378,7 +444,8 @@ annotationActions = {
   "undoPath": undoPath,
   "redoPath": redoPath, 
   "clearBoard": clearBoard,
-  "dragToolbox": dragToolbox
+  "dragToolbox": dragToolbox,
+  "setToolboxPos": setToolboxPos
 }
 
 browser.runtime.onMessage.addListener((message) => {
