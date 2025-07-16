@@ -13,6 +13,8 @@ const undoButton = $("undoButton");
 const redoButton = $("redoButton");
 const clearBoardButton = $("clearBoardButton");
 const settingsButton = $("settingsButton");
+const collapsed = $("collapsed");
+const innerMenu = $("innerMenu");
 var defaultColors = ["#FF0000","#00FF00","#0000FF"] // gets replaced by settings anyways
 var colors = [];
 var colorsString = [];
@@ -105,6 +107,7 @@ function colorPressed(b) {
 menu.addEventListener("mousedown", (e) => {
     const nodrag = Array.from(document.getElementsByClassName("nodrag"));
     var draggable = true;
+    if (innerMenu.classList.contains("hidden")) { draggable = false; }
     for (const i in nodrag) {
         if (nodrag[i].matches(":hover")) {
             draggable = false;
@@ -203,6 +206,8 @@ function updateStatus(command, args=null, reason=null, button=null) {
     if (reason == "updateStatus") {
         mode.classList.remove("selected");
         button.classList.add("selected");
+        if (collapsed.children[0]) { collapsed.children[0].remove(); }
+        collapsed.appendChild(button.children[0].cloneNode());
         mode = button;
     }
     browser.runtime.sendMessage({command:command,status:args})
@@ -219,11 +224,35 @@ document.addEventListener("DOMContentLoaded", () => {
     
 })
 
-window.addEventListener("message", (e) => {
-    e.data.forEach((c) => {
+function addLoadedColors(loadedColors) {
+    loadedColors.forEach((c) => {
         if (!colorsString.includes(c)) {
             addNewColor(c);
         }
     });
+}
+
+function collapseToolbox() {
+    innerMenu.classList.add("hidden");
+    menu.classList.add("collapsed");
+    collapsed.style.visibility = "visible";
+}
+
+function expandToolbox() {
+    innerMenu.classList.remove("hidden");
+    menu.classList.remove("collapsed");
+    collapsed.style.visibility = "hidden";
+}
+
+const toolboxActions = {
+    "addLoadedColors": addLoadedColors,
+    "collapseToolbox": collapseToolbox,
+    "expandToolbox": expandToolbox
+}
+
+
+
+window.addEventListener("message", (e) => {
+    toolboxActions[e.data.command].apply(null,e.data.status);
 })
 

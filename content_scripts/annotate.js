@@ -18,7 +18,7 @@ var colors = [];
 var autosave = false;
 var changes = false;
 var cursorType = "circle";
-
+var toolboxAnchor = [];
 var saveStates = [];
 var redoStates = [];
 
@@ -88,6 +88,7 @@ function loadToolbox() {
           height: 260px;
           width: 200px;
           z-index: 999999999999;
+          transition: height 0.1s ease-out, width 0.1s ease-out;
         }
     `;
     document.head.appendChild(stylesheet);
@@ -131,10 +132,11 @@ function loadToolbox() {
       if (cursorType != "crosshair") {
         cursor.style.visibility = "visible";
       }
-      
+      collapseToolbox();
     })
     toolbox.addEventListener("mouseover", () => {
       cursor.style.visibility = "hidden";
+      expandToolbox();
     })
 
     load();
@@ -142,6 +144,39 @@ function loadToolbox() {
   } else {
     toolbox.style.visibility = "visible";
     canvas.style.visibility = "visible";
+  }
+}
+
+function collapseToolbox() {
+  console.log(toolboxAnchor);
+  toolbox.contentWindow.postMessage(data={command:"collapseToolbox"},targetOrigin=toolbox.src);
+  toolbox.style.height = "60px";
+  toolbox.style.width = "60px";
+  // right, bottom, xcenter, ycenter
+  fixToolboxPos("collapse");
+}
+
+function expandToolbox() {
+  toolbox.contentWindow.postMessage(data={command:"expandToolbox"},targetOrigin=toolbox.src);
+  toolbox.style.height = "260px";
+  toolbox.style.width = "200px";
+  fixToolboxPos("expand");
+}
+
+function fixToolboxPos(type) {
+  var multiplier = 1;
+  if (type == "expand") { multiplier = -1; }
+  if (toolboxAnchor.includes("right")) {
+    toolbox.style.left = noPx(toolbox.style.left) + ((200-60-15)*multiplier) + "px";
+  }
+  if (toolboxAnchor.includes("bottom")) {
+    toolbox.style.top = noPx(toolbox.style.top) + ((260-60-15)*multiplier) + "px";
+  }
+  if (toolboxAnchor.includes("xcenter")) {
+    toolbox.style.left = noPx(toolbox.style.left) + ((100-60) * multiplier) + "px";
+  }
+  if (toolboxAnchor.includes("ycenter")) {
+    toolbox.style.top = noPx(toolbox.style.top) + ((130-60) * multiplier) + "px";
   }
 }
 
@@ -308,7 +343,7 @@ function load() {
   console.log("LOADING");
   const canvasData = browser.storage.local.get(webPath);
   canvasData.then((result) => {
-    toolbox.contentWindow.postMessage(data=result[webPath][0][1],targetOrigin=toolbox.src);
+    toolbox.contentWindow.postMessage(data={command:"addLoadedColors",status:[result[webPath][0][1]]},targetOrigin=toolbox.src);
     const imageData = result[webPath][0][0];
     const image = new Image();
     image.onload = () => {
@@ -370,7 +405,13 @@ function getDistance(x1,y1,x2,y2) {
   return Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
 }
 
+function noPx(css) {
+  return parseInt(css.replace('px',''));
+}
+
 function setToolboxPos() {
+  console.log("setting pos");
+  toolboxAnchor = [];
   var margin = 15;
   var newX;
   var newY;
@@ -402,26 +443,33 @@ function setToolboxPos() {
     } else if (closestCorner == topRight) {
       newX = (viewportWidth - margin - menuWidth) + "px";
       newY = margin + "px";
+      toolboxAnchor.push("right");
     } else if (closestCorner == bottomLeft) {
       newX = margin + "px";
       newY = (viewportHeight - margin - menuHeight) + "px";
+      toolboxAnchor.push("bottom");
     } else {
       newX = (viewportWidth - margin - menuWidth) + "px";
       newY = (viewportHeight - margin - menuHeight) + "px";
+      toolboxAnchor.push("right","bottom");
     }
   } else {
     //determine whether to stick to x or y plane
     if (xToWall > yToWall) {
+      toolboxAnchor.push("ycenter");
       if (currentX < (0.5)*viewportWidth) {
         newX = margin + "px";
       } else {
         newX = (viewportWidth - margin - menuWidth) + "px";
+        toolboxAnchor.push("right");
       }
     } else {
+      toolboxAnchor.push("xcenter");
       if (currentY < (0.5)*viewportHeight) {
         newY = margin + "px";
       } else {
         newY = (viewportHeight - margin - menuHeight) + "px";
+        toolboxAnchor.push("bottom");
       }
     }
   }
