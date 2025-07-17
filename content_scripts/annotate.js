@@ -134,7 +134,7 @@ function createCanvases() {
     }
 }
 
-const pixelLimit = 10000000;
+const pixelLimit = 5000000;
 function loadToolbox() {
   if (!toolbox) {
     console.log("loading toolbox....")
@@ -292,15 +292,37 @@ function removePathFromStack(stack) {
   })
 }
 
+function updateUndoStack() {
+  var state = [];
+  canvas.forEach((c) => {
+    state.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
+  })
+  saveStates.push(state);
+  if (redoStates.length > 0) {
+    redoStates = [];
+  }
+  if (saveStates.length > undoRedoCap+1) {
+    saveStates.shift();
+  }
+}
+
 function undoPath() {
   if (!undoredoAction && saveStates.length > 1) {
     console.log("undoing");
     undoredoAction = true;
-    redoStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    var newRedoState = [];
+    canvas.forEach((c) => {
+      newRedoState.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
+    })
+    redoStates.push(newRedoState);
     removePathFromStack(saveStates).then(() => {
-      ctx.clearRect(0,0,canvas.width,canvas.height); 
+      canvas.forEach((c) => {
+        c.getContext("2d").clearRect(0,0,c.width,c.height);
+      })
       if (saveStates.length > 0) {
-        ctx.putImageData(saveStates[saveStates.length-1],0,0);
+        saveStates[saveStates.length-1].forEach((state) => {
+          canvas[state.order].getContext("2d").putImageData(state.data,0,0);
+        })
       }
       undoredoAction = false;
     })
@@ -314,8 +336,11 @@ function redoPath() {
     undoredoAction = true;
     saveStates.push(redoStates[redoStates.length-1]);
     removePathFromStack(redoStates).then((p) => {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.putImageData(p,0,0);
+      p.forEach((state) => {
+        var ctx = canvas[state.order].getContext("2d");
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.putImageData(state.data,0,0);
+      })
       undoredoAction = false;
     })
     changes = true;
@@ -350,18 +375,7 @@ function onMouseUp(e) {
       erase(e.pageX,e.pageY);
     }
     changes = true;
-    //updateUndoStack();
-  }
-}
-
-function updateUndoStack() {
-  saveStates.push(ctx.getImageData(0,0,canvas.width,canvas.height));
-  console.log(saveStates);
-  if (redoStates.length > 0) {
-    redoStates = [];
-  }
-  if (saveStates.length > undoRedoCap+1) {
-    saveStates.shift();
+    updateUndoStack();
   }
 }
 
@@ -410,7 +424,6 @@ function draw(x,y) {
         var ctx = c.getContext("2d");
         ctx.lineTo(x,getCorrectY(y,c.getAttribute("order")));
         ctx.stroke(); 
-        console.log("drawing to " + c.getAttribute("order"));
       }
     })
   }
