@@ -2,8 +2,6 @@ const webPath = window.location.href.split('?')[0];
 
 // canvas handling
 var toolbox;
-var canvas;
-var ctx;
 var cursor;
 var mode = "cursor";
 var prevX, prevY
@@ -22,6 +20,27 @@ var toolboxAnchor = [];
 var saveStates = [];
 var redoStates = [];
 
+var maxCanvasHeight;
+var canvas = [];
+var currCanvas;
+var currCtx;
+var ctx;
+
+var canvasDiv;
+
+function isElementInViewport(el) {
+    var rect = el.getBoundingClientRect();
+    // DOMRect { x: 8, y: 8, width: 100, height: 100, top: 8, right: 108, bottom: 108, left: 8 }
+    var windowHeight = (window.innerHeight || document.documentElement.clientHeight);
+    var windowWidth = (window.innerWidth || document.documentElement.clientWidth);
+
+    // http://stackoverflow.com/questions/325933/determine-whether-two-date-ranges-overlap
+    var vertInView = (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
+    var horInView = (rect.left <= windowWidth) && ((rect.left + rect.width) >= 0);
+
+    return (vertInView && horInView);
+}
+
 function openclose() {
     if (opened) {
         opened = false;
@@ -36,17 +55,97 @@ function openclose() {
 function hideToolBox() {
   if (toolbox) {
     toolbox.style.visibility = "hidden";
-    canvas.style.visibility = "hidden";
+    canvasDiv.style.display = "none";
   }
 }
 
+function getCtx(c) {
+  return c.getContext("2d");
+}
+
+function setCurrentCanvas(e) {
+  currCanvas = e.target;
+  currCtx = e.target.getContext("2d");
+  /*if (e.buttons == 1) {
+    ctx.strokeStyle = color;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.lineWidth = penWidth;
+    ctx.beginPath();
+    ctx.moveTo(e.pageX, getCorrectY(e.pageY));
+  }*/
+}
+
+function makeCanvas(width, height, div, clr, id) {
+  var newCanvas = document.createElement("canvas");
+  div.append(newCanvas);
+  newCanvas.style.all = "initial";
+  newCanvas.className = "webannotate-canvas";
+  newCanvas.width = width;
+  newCanvas.height = height;
+  newCanvas.style.userSelect = "none";
+  newCanvas.style.zIndex = 999999999;
+  newCanvas.style.cursor = "none";
+  newCanvas.style.backgroundColor = clr;
+  newCanvas.style.margin = 0;
+  newCanvas.style.lineHeight = "0px";
+  newCanvas.setAttribute("order",id);
+  newCanvas.verticalAlign = "top";
+  newCanvas.onmouseover = setCurrentCanvas;
+  canvas.push(newCanvas);
+}
+
+function createCanvases() {
+    canvas = [];
+    var webWidth = document.body.scrollWidth;
+    var webHeight = document.body.scrollHeight;
+    var maxHeight = pixelLimit/webWidth;
+    maxCanvasHeight = maxHeight;
+    var canvasToMake = Math.ceil(webHeight/maxHeight);
+
+    if (canvasDiv) {
+      const c = Array.from(canvasDiv.children);
+      c.forEach((ele) => {
+        ele.remove();
+      })
+    } else {
+      canvasDiv = document.createElement("div");
+      canvasDiv.id = "webannotate-canvasdiv";
+      canvasDiv.style.position = "absolute";
+      canvasDiv.style.display = "block";
+      canvasDiv.style.verticalAlign = "top";
+      canvasDiv.style.zIndex = 999999999;
+      canvasDiv.style.top = 0;
+      canvasDiv.style.left = 0;
+      canvasDiv.style.lineHeight = "0px";
+      canvasDiv.inert = true;
+      document.body.append(canvasDiv);
+    }
+
+    var clor = ["rgba(255,0,0,0.5)","rgba(0,255,0,0.5)","rgba(0,0,255,0.5)"]
+    var remainingHeight = webHeight;
+    for (var ct = 0; ct < canvasToMake; ct++) {
+      if (ct == canvasToMake-1) {
+        makeCanvas(webWidth,remainingHeight,canvasDiv,clor[ct], ct);
+      } else {
+        makeCanvas(webWidth,maxHeight,canvasDiv,clor[ct], ct);
+        remainingHeight = remainingHeight - maxHeight;
+      }
+    }
+}
+
+const pixelLimit = 10000000;
 function loadToolbox() {
   if (!toolbox) {
     console.log("loading toolbox....")
     const iframe = document.createElement("iframe");
     iframe.id = 'ext-toolbox';
     iframe.src = browser.extension.getURL("ui/toolbox.html");
-    canvas = document.createElement("canvas");
+    document.body.append(iframe);
+
+    createCanvases();
+
+    /*canvas = document.createElement("canvas");
     ctx = canvas.getContext("2d");
     document.body.append(canvas);
     canvas.style.all = "initial";
@@ -60,7 +159,7 @@ function loadToolbox() {
     canvas.style.position = "absolute";
     canvas.style.cursor = "none";
     canvas.inert = true;
-    document.body.append(iframe);
+    */
 
     cursor = document.createElement("div");
     cursor.style.all = "initial";
@@ -75,7 +174,7 @@ function loadToolbox() {
     cursor.style.filter = "invert(1)";
     cursor.style.mixBlendMode = "difference";
     cursor.inert = true;
-    cursor.style.zIndex = canvas.style.zIndex + 1;
+    cursor.style.zIndex = canvasDiv.style.zIndex + 1;
     document.body.append(cursor);
     
     const stylesheet = document.createElement("style");
@@ -139,16 +238,15 @@ function loadToolbox() {
       expandToolbox();
     })
 
-    load();
-    updateUndoStack();
+    //load(); // ADD BACK LATER
+    //updateUndoStack(); // ADD BACK LATER
   } else {
     toolbox.style.visibility = "visible";
-    canvas.style.visibility = "visible";
+    canvasDiv.style.display = "block";
   }
 }
 
 function collapseToolbox() {
-  console.log(toolboxAnchor);
   toolbox.contentWindow.postMessage(data={command:"collapseToolbox"},targetOrigin=toolbox.src);
   toolbox.style.height = "60px";
   toolbox.style.width = "60px";
@@ -228,26 +326,31 @@ function redoPath() {
 
 function onMouseDown(e) {
   if (mode == "draw" || mode == "erase") {
-    canvas.setPointerCapture(e.pointerId);
-    ctx.strokeStyle = color;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.lineWidth = penWidth;
-    ctx.beginPath();
-    ctx.moveTo(e.pageX, e.pageY);
+    //canvasDiv.setPointerCapture(e.pointerId);
+    canvas.forEach((c) => {
+      if (isElementInViewport(c)) {
+        var ctx = c.getContext("2d");
+        ctx.strokeStyle = color;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.lineWidth = penWidth;
+        ctx.beginPath();
+        ctx.moveTo(e.pageX, getCorrectY(e.pageY,c.getAttribute("order")));
+      }
+    })
   }
 }
 
 function onMouseUp(e) {
-  if ((mode == "draw" || mode == "erase") && e.button == 0 && canvas.matches(":hover")) {
-    canvas.releasePointerCapture(e.pointerId);
+  if ((mode == "draw" || mode == "erase") && e.button == 0) {
+    //canvasDiv.releasePointerCapture(e.pointerId);
     if (mode == "draw") {
       draw(e.pageX,e.pageY);
     } else if (mode == "erase") {
       erase(e.pageX,e.pageY);
     }
     changes = true;
-    updateUndoStack();
+    //updateUndoStack();
   }
 }
 
@@ -262,13 +365,11 @@ function updateUndoStack() {
   }
 }
 
-/*function handleClickEvent(e) {
-  if (mode == "draw") {
-    draw(e.pageX,e.pageY);
-  } else if (mode == "erase") {
-    erase(e.pageX,e.pageY);
-  }
-}*/
+function getCorrectY(pageY,currOrder) {
+  //const currOrder = canvas.getAttribute("order");
+  const y = pageY - (maxCanvasHeight*currOrder);
+  return y;
+}
 
 function handleMouseMoveEvent(e) {
   updateCursor(e);
@@ -296,26 +397,37 @@ function updateCursor(e) {
 function updateStatus(status) {
   mode = status;
   if (status == "cursor") {
-    canvas.inert = true;
+    canvasDiv.inert = true;
   } else {
-    canvas.inert = false;
+    canvasDiv.inert = false;
   }
 }
 
 function draw(x,y) {
-  if (canvas && toolbox.style.visibility != "hidden") {
-    ctx.lineTo(x,y);
-    ctx.stroke(); 
+  if (canvasDiv && toolbox.style.visibility != "hidden") {
+    canvas.forEach((c) => {
+      if (isElementInViewport(c)) {
+        var ctx = c.getContext("2d");
+        ctx.lineTo(x,getCorrectY(y,c.getAttribute("order")));
+        ctx.stroke(); 
+        console.log("drawing to " + c.getAttribute("order"));
+      }
+    })
   }
 }
 
 function erase(x,y) {
-  if (canvas && toolbox.style.visibility != "hidden") {
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.lineTo(x,y);
-    ctx.stroke();
-    ctx.restore()
+  if (canvasDiv && toolbox.style.visibility != "hidden") {
+    canvas.forEach((c) => {
+      if (isElementInViewport(c)) {
+        var ctx = c.getContext("2d");
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineTo(x,getCorrectY(y,c.getAttribute("order")));
+        ctx.stroke();
+        ctx.restore()
+      }
+    })
   }
 }
 
@@ -410,7 +522,6 @@ function noPx(css) {
 }
 
 function setToolboxPos() {
-  console.log("setting pos");
   toolboxAnchor = [];
   var margin = 15;
   var newX;
