@@ -20,8 +20,11 @@ var toolboxAnchor = [];
 var saveStates = [];
 var redoStates = [];
 
+var undoRedoCapBroken = false;
+
 var maxCanvasHeight;
 var canvas = [];
+var canvasWithChanges = [];
 var currCanvas;
 var currCtx;
 var ctx;
@@ -206,7 +209,7 @@ function loadToolbox() {
         const maxUndoSetting = data["settings"][0]["maxUndo"];
         const cursorTypeSetting = data["settings"][0]["cursor"];
         autosave = autoSaveSetting;
-        undoRedoCap = maxUndoSetting;
+        undoRedoCap = parseInt(maxUndoSetting);
         cursorType = cursorTypeSetting;
         if (cursorType == "crosshair" || cursorType == "both") {
           console.log("settin ccanvas cursor");
@@ -244,7 +247,7 @@ function loadToolbox() {
     })
 
     //load(); // ADD BACK LATER
-    //updateUndoStack(); // ADD BACK LATER
+    updateUndoStack();
   } else {
     toolbox.style.visibility = "visible";
     canvasDiv.style.display = "block";
@@ -299,41 +302,61 @@ function removePathFromStack(stack) {
 
 function updateUndoStack() {
   var state = [];
-  canvas.forEach((c) => {
-    if (isElementInViewport(c)) {
-      state.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
-    }
-  })
+  canvasWithChanges.forEach((c) => {
+    state.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
+  });
   saveStates.push(state);
   if (redoStates.length > 0) {
     redoStates = [];
   }
-  if (saveStates.length > undoRedoCap+1) {
+  console.log(saveStates.length + " > " + parseInt(undoRedoCap+1));
+  console.log(saveStates.length > undoRedoCap+1);
+  if (saveStates.length > parseInt(undoRedoCap+1)) {
+    console.log("shifting...");
+    undoRedoCapBroken = true;
     saveStates.shift();
   }
+  console.log(saveStates);
 }
 
 function undoPath() {
   if (!undoredoAction && saveStates.length > 1) {
     console.log("undoing");
     undoredoAction = true;
-    var newRedoState = [];
-    canvas.forEach((c) => {
-      if (isElementInViewport(c)) {
-        newRedoState.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
-      }
-    })
-    redoStates.push(newRedoState);
+    redoStates.push(saveStates[saveStates.length-1]);
+    var toUpdate = [];
+    saveStates[saveStates.length-1].forEach((state) => { toUpdate.push(state.order); })
     removePathFromStack(saveStates).then(() => {
-      canvas.forEach((c) => {
-        c.getContext("2d").clearRect(0,0,c.width,c.height);
-      })
       if (saveStates.length > 0) {
-        saveStates[saveStates.length-1].forEach((state) => {
+        /*saveStates[saveStates.length-1].forEach((state) => {
+          canvas[state.order].getContext("2d").clearRect(0,0,canvas[state.order].width,canvas[state.order].height);
           canvas[state.order].getContext("2d").putImageData(state.data,0,0);
-        })
+        })*/
+        toUpdate.forEach((order) => {
+          var updated = false;
+          can:
+          for (var i = saveStates.length-1; i > -1; i--) {
+            for(var j = 0; j < saveStates[i].length; j++)  {
+              var state = saveStates[i][j];
+              if (state.order == order) {
+                canvas[state.order].getContext("2d").clearRect(0,0,canvas[state.order].width,canvas[state.order].height);
+                canvas[state.order].getContext("2d").putImageData(state.data,0,0);
+                updated = true
+                console.log("Updated order " + order);
+                break can;
+              }
+            }
+          }
+          if (!updated) { 
+            console.log("No previous states for " + order);
+            if (!undoRedoCapBroken) {
+              canvas[order].getContext("2d").clearRect(0,0,canvas[order].width,canvas[order].height);
+            }
+          }
+        });
       }
       undoredoAction = false;
+      console.log(saveStates);
     })
     changes = true;
   }
@@ -358,19 +381,33 @@ function redoPath() {
   }
 }
 
+function isHovering(element1, element2) {
+  const rect1 = element1.getBoundingClientRect();
+  const rect2 = element2.getBoundingClientRect();
+
+  return (
+    rect1.top < rect2.bottom &&
+    rect1.bottom > rect2.top &&
+    rect1.left < rect2.right &&
+    rect1.right > rect2.left
+  );
+}
+
 function onMouseDown(e) {
   if (mode == "draw" || mode == "erase") {
     //canvasDiv.setPointerCapture(e.pointerId);
+    canvasWithChanges = [];
     canvas.forEach((c) => {
-      if (isElementInViewport(c)) {
-        var ctx = c.getContext("2d");
-        ctx.strokeStyle = color;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.lineWidth = penWidth;
-        ctx.beginPath();
-        ctx.moveTo(e.pageX, getCorrectY(e.pageY,c.getAttribute("order")));
+      if (isHovering(c,cursor) && !canvasWithChanges.includes(c)) {
+        canvasWithChanges.push(c); 
       }
+      var ctx = c.getContext("2d");
+      ctx.strokeStyle = color;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.lineWidth = penWidth;
+      ctx.beginPath();
+      ctx.moveTo(e.pageX, getCorrectY(e.pageY,c.getAttribute("order")));
     })
   }
 }
@@ -430,6 +467,9 @@ function draw(x,y) {
   if (canvasDiv && toolbox.style.visibility != "hidden") {
     canvas.forEach((c) => {
       if (isElementInViewport(c)) {
+        if (isHovering(c,cursor) && !canvasWithChanges.includes(c)) {
+          canvasWithChanges.push(c); 
+        }
         var ctx = c.getContext("2d");
         ctx.lineTo(x,getCorrectY(y,c.getAttribute("order")));
         ctx.stroke(); 
@@ -442,6 +482,9 @@ function erase(x,y) {
   if (canvasDiv && toolbox.style.visibility != "hidden") {
     canvas.forEach((c) => {
       if (isElementInViewport(c)) {
+        if (isHovering(c,cursor) && !canvasWithChanges.includes(c)) {
+          canvasWithChanges.push(c); 
+        }
         var ctx = c.getContext("2d");
         ctx.save();
         ctx.globalCompositeOperation = 'destination-out';
