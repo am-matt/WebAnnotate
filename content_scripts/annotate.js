@@ -77,6 +77,11 @@ function setCurrentCanvas(e) {
 }
 
 function makeCanvas(width, height, div, clr, id) {
+  const r = Math.floor(Math.random() * 256); // Random red (0-255)
+  const g = Math.floor(Math.random() * 256); // Random green (0-255)
+  const b = Math.floor(Math.random() * 256); // Random blue (0-255)
+  const a = 0.5; // Fixed alpha value
+
   var newCanvas = document.createElement("canvas");
   div.append(newCanvas);
   newCanvas.style.all = "initial";
@@ -86,7 +91,7 @@ function makeCanvas(width, height, div, clr, id) {
   newCanvas.style.userSelect = "none";
   newCanvas.style.zIndex = 999999999;
   newCanvas.style.cursor = "none";
-  newCanvas.style.backgroundColor = clr;
+  newCanvas.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
   newCanvas.style.margin = 0;
   newCanvas.style.lineHeight = "0px";
   newCanvas.setAttribute("order",id);
@@ -295,7 +300,9 @@ function removePathFromStack(stack) {
 function updateUndoStack() {
   var state = [];
   canvas.forEach((c) => {
-    state.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
+    if (isElementInViewport(c)) {
+      state.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
+    }
   })
   saveStates.push(state);
   if (redoStates.length > 0) {
@@ -312,7 +319,9 @@ function undoPath() {
     undoredoAction = true;
     var newRedoState = [];
     canvas.forEach((c) => {
-      newRedoState.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
+      if (isElementInViewport(c)) {
+        newRedoState.push({data:c.getContext("2d").getImageData(0,0,c.width,c.height),order:c.getAttribute("order")});
+      }
     })
     redoStates.push(newRedoState);
     removePathFromStack(saveStates).then(() => {
