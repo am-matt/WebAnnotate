@@ -218,7 +218,9 @@ document.addEventListener("DOMContentLoaded", () => {
     getSettings.then((data) => {
         defaultColors = data["settings"][0]["colors"];
         defaultColors.forEach((c) => {
-            addNewColor(c);
+            if (!colorsString.includes(c)) {
+                addNewColor(c);
+            }
         })
     })
     
@@ -249,8 +251,6 @@ const toolboxActions = {
     "collapseToolbox": collapseToolbox,
     "expandToolbox": expandToolbox
 }
-
-
 
 window.addEventListener("message", (e) => {
     toolboxActions[e.data.command].apply(null,e.data.status);

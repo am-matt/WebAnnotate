@@ -54,7 +54,7 @@ getStorage.then((data) => {
         }
         row.appendChild(usageCell);
 
-        const downloadCell = document.createElement("td");
+        /*const downloadCell = document.createElement("td");
         const downloadButton = document.createElement("button");
         downloadButton.innerText = "Download";
         downloadCell.appendChild(downloadButton);
@@ -67,7 +67,7 @@ getStorage.then((data) => {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        })
+        })*/
 
         const deleteCell = document.createElement("td");
         const deleteButton = document.createElement("button");

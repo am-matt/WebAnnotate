@@ -79,12 +79,7 @@ function setCurrentCanvas(e) {
   }*/
 }
 
-function makeCanvas(width, height, div, clr, id) {
-  const r = Math.floor(Math.random() * 256); // Random red (0-255)
-  const g = Math.floor(Math.random() * 256); // Random green (0-255)
-  const b = Math.floor(Math.random() * 256); // Random blue (0-255)
-  const a = 0.5; // Fixed alpha value
-
+function makeCanvas(width, height, div, id) {
   var newCanvas = document.createElement("canvas");
   div.append(newCanvas);
   newCanvas.style.all = "initial";
@@ -94,7 +89,6 @@ function makeCanvas(width, height, div, clr, id) {
   newCanvas.style.userSelect = "none";
   newCanvas.style.zIndex = 999999999;
   newCanvas.style.cursor = "none";
-  newCanvas.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
   newCanvas.style.margin = 0;
   newCanvas.style.lineHeight = "0px";
   newCanvas.setAttribute("order",id);
@@ -129,14 +123,12 @@ function createCanvases() {
       canvasDiv.inert = true;
       document.body.append(canvasDiv);
     }
-
-    var clor = ["rgba(255,0,0,0.5)","rgba(0,255,0,0.5)","rgba(0,0,255,0.5)"]
     var remainingHeight = webHeight;
     for (var ct = 0; ct < canvasToMake; ct++) {
       if (ct == canvasToMake-1) {
-        makeCanvas(webWidth,remainingHeight,canvasDiv,clor[ct], ct);
+        makeCanvas(webWidth,remainingHeight,canvasDiv, ct);
       } else {
-        makeCanvas(webWidth,maxHeight,canvasDiv,clor[ct], ct);
+        makeCanvas(webWidth,maxHeight,canvasDiv, ct);
         remainingHeight = remainingHeight - maxHeight;
       }
     }
@@ -148,26 +140,11 @@ function loadToolbox() {
     console.log("loading toolbox....")
     const iframe = document.createElement("iframe");
     iframe.id = 'ext-toolbox';
+    iframe.onload = load;
     iframe.src = browser.extension.getURL("ui/toolbox.html");
     document.body.append(iframe);
 
     createCanvases();
-
-    /*canvas = document.createElement("canvas");
-    ctx = canvas.getContext("2d");
-    document.body.append(canvas);
-    canvas.style.all = "initial";
-    canvas.id = "webannotate-canvas";
-    canvas.width = document.body.scrollWidth;
-    canvas.height = document.body.scrollHeight;
-    canvas.style.userSelect = "none"
-    canvas.style.zIndex = 999999999;
-    canvas.style.top = 0;
-    canvas.style.left = 0;
-    canvas.style.position = "absolute";
-    canvas.style.cursor = "none";
-    canvas.inert = true;
-    */
 
     cursor = document.createElement("div");
     cursor.style.all = "initial";
@@ -245,9 +222,6 @@ function loadToolbox() {
       cursor.style.visibility = "hidden";
       expandToolbox();
     })
-
-    //load(); // ADD BACK LATER
-    updateUndoStack();
   } else {
     toolbox.style.visibility = "visible";
     canvasDiv.style.display = "block";
@@ -508,12 +482,29 @@ function clearBoard() {
 
 async function save() {
   console.log("TRYING TO SAVE");
-  const canvasData = canvas.toDataURL();
+  const canvasData = [];
+  canvas.forEach((c)=> {
+    canvasData.push(c.toDataURL());
+  })
   const save = browser.storage.local.set({[webPath]:[[canvasData,colors]]});
   save.then(() => {
     console.log("SAVED");
     changes = false;
   }, onError)
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    img.src = src;
+  })
+}
+
+function loadAllImages(srcArr) {
+  const promises = srcArr.map(loadImage);
+  return Promise.all(promises);
 }
 
 function load() {
@@ -522,14 +513,22 @@ function load() {
   canvasData.then((result) => {
     toolbox.contentWindow.postMessage(data={command:"addLoadedColors",status:[result[webPath][0][1]]},targetOrigin=toolbox.src);
     const imageData = result[webPath][0][0];
-    const image = new Image();
-    image.onload = () => {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(image,0,0)
-      updateUndoStack();
-      console.log("LOADED");
+    var images = [];
+    for (var i = 0; i < canvas.length; i++) {
+      images[i] = imageData[i];
     }
-    image.src = imageData;
+    loadAllImages(images).then((imgs) => {
+      for (var i = 0; i < canvas.length; i++) {
+        const c = canvas[i];
+        const ctx = c.getContext("2d");
+        const image = imgs[i];
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(image,0,0);
+      }
+      console.log("LOADED");
+      canvas.forEach((c)=>{canvasWithChanges.push(c);})
+      updateUndoStack();
+    });
   }, onError);
 }
 
