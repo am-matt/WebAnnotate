@@ -89,7 +89,7 @@ function makeCanvas(width, height, div, id) {
   newCanvas.height = height;
   newCanvas.style.userSelect = "none";
   newCanvas.style.zIndex = 999999999;
-  newCanvas.style.cursor = "none";
+  newCanvas.style.cursor = "inherit";
   newCanvas.style.margin = 0;
   newCanvas.style.lineHeight = "0px";
   newCanvas.setAttribute("order",id);
@@ -117,6 +117,7 @@ function createCanvases() {
       canvasDiv.style.position = "absolute";
       canvasDiv.style.display = "block";
       canvasDiv.style.verticalAlign = "top";
+      canvasDiv.style.cursor = "none";
       canvasDiv.style.zIndex = 999999999;
       canvasDiv.style.top = 0;
       canvasDiv.style.left = 0;
@@ -192,7 +193,7 @@ function loadToolbox() {
         undoRedoCap = parseInt(maxUndoSetting);
         cursorType = cursorTypeSetting;
         if (cursorType == "crosshair" || cursorType == "both") {
-          canvas.style.cursor = "crosshair";
+          canvasDiv.style.cursor = "crosshair";
         }
         if (cursorType == "crosshair") {
           cursor.style.visibility = "hidden";
@@ -303,10 +304,6 @@ function undoPath() {
     saveStates[saveStates.length-1].forEach((state) => { toUpdate.push(state.order); })
     removePathFromStack(saveStates).then(() => {
       if (saveStates.length > 0) {
-        /*saveStates[saveStates.length-1].forEach((state) => {
-          canvas[state.order].getContext("2d").clearRect(0,0,canvas[state.order].width,canvas[state.order].height);
-          canvas[state.order].getContext("2d").putImageData(state.data,0,0);
-        })*/
         toUpdate.forEach((order) => {
           var updated = false;
           can:
@@ -364,7 +361,7 @@ function isHovering(element1, element2) {
 
 function onMouseDown(e) {
   if (mode == "draw" || mode == "erase") {
-    //canvasDiv.setPointerCapture(e.pointerId);
+    canvasDiv.setPointerCapture(e.pointerId);
     canvasWithChanges = [];
     canvas.forEach((c) => {
       if (isHovering(c,cursor) && !canvasWithChanges.includes(c)) {
@@ -383,7 +380,7 @@ function onMouseDown(e) {
 
 function onMouseUp(e) {
   if ((mode == "draw" || mode == "erase") && e.button == 0) {
-    //canvasDiv.releasePointerCapture(e.pointerId);
+    canvasDiv.releasePointerCapture(e.pointerId);
     if (mode == "draw") {
       draw(e.pageX,e.pageY);
     } else if (mode == "erase") {
@@ -470,9 +467,13 @@ function updatePenSize(penSize) {
 }
 
 function clearBoard() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  canvas.forEach((c) => {
+    var ctx = c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
+    canvasWithChanges.push(c);
+  });
   updateUndoStack();
-  canvas.focus();
+  canvasDiv.focus();
 }
 
 async function save() {
