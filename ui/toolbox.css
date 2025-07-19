@@ -40,8 +40,8 @@
     position: fixed;
     left: 0px;
     top: 0px;
-    width: 100%;
-    height: 100%;
+    width: 200px;
+    height: 260px;
     background-color: rgba(0,0,0,0.5);
     border-radius: 5%; 
     transition: scale 0.2s linear;
@@ -58,6 +58,13 @@
     align-items: center;
     margin-top: 10px;
     margin-bottom: 5px;
+}
+
+i.action {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .colorButton {
@@ -96,19 +103,43 @@
     opacity: 0%;
 }
 
-
 .statusButton {
     border: none;
     outline: none;
     margin-left: 10px;
-    border-radius: 25%;
-    height: 37px;
-    width: 37px;
-    outline-style: solid;
-    outline-color: white;
-    outline-width: 2px;
+    border-radius: 30%;
+    height: 48px;
+    width: 48px;
+    border: 2px solid white;
     background-color: black;
+    position: relative;
     cursor: pointer;
+    overflow: hidden;
+
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+.statusButton:hover {
+    background-color: rgba(30,30,30);
+}
+
+.statusButton.selected:hover {
+    background-color: white;
+}
+
+.glow {
+    background-image: radial-gradient(closest-side,rgba(255,255,255,0.4),transparent);
+    background-repeat: no-repeat;
+    background-position-y: 17px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    scale: 1.5;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
 }
 
 #footerButtons {

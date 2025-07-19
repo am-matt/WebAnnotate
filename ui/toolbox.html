@@ -5,6 +5,7 @@
         <meta name="color-scheme" content="light dark">
         <link rel="stylesheet" href="toolbox.css" />
         <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
         <script defer src="toolbox.js"></script>
     </head>
 
@@ -20,9 +21,18 @@
                 </div>
 
                 <div id="statusButtons">
-                    <button id="cursor-button" class="statusButton selected nodrag"><i class="fi fi-ss-location-arrow"></i></button>
-                    <button id="draw-button" class="statusButton nodrag"><i class="fi fi-ss-attribution-pencil"></i></button>
-                    <button id="erase-button" class="statusButton nodrag"><i class="fi fi-ss-eraser"></i></button>
+                    <button id="cursor-button" class="statusButton selected nodrag">
+                        <i class="fi fi-sr-cursor action"></i>
+                        <div class="glow"></div>
+                    </button>
+                    <button id="draw-button" class="statusButton nodrag">
+                        <i class="fi fi-sr-pencil-paintbrush action"></i>
+                        <div class="glow"></div>
+                    </button>
+                    <button id="erase-button" class="statusButton nodrag">
+                        <i class="fi fi-sr-eraser action"></i>
+                        <div class="glow"></div>
+                    </button>
                 </div>
 
                 <div id="strokeSize">
