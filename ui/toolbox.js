@@ -105,6 +105,7 @@ function colorPressed(b) {
 }
 
 menu.addEventListener("mousedown", (e) => {
+    if (e.button != 0) { return; }
     const nodrag = Array.from(document.getElementsByClassName("nodrag"));
     var draggable = true;
     if (innerMenu.classList.contains("hidden")) { draggable = false; }

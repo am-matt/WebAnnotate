@@ -59,6 +59,7 @@ function hideToolBox() {
   if (toolbox) {
     toolbox.style.visibility = "hidden";
     canvasDiv.style.display = "none";
+    cursor.style.visibility = "hidden";
   }
 }
 
@@ -140,6 +141,7 @@ function loadToolbox() {
     console.log("loading toolbox....")
     const iframe = document.createElement("iframe");
     iframe.id = 'ext-toolbox';
+    iframe.allowTransparency = true;
     iframe.onload = load;
     iframe.src = browser.extension.getURL("ui/toolbox.html");
     document.body.append(iframe);
@@ -166,6 +168,7 @@ function loadToolbox() {
     stylesheet.textContent = `
         #ext-toolbox {
           all: initial;
+          color-scheme: dark;
           position: fixed;
           top: 15px;
           left: 15px;
@@ -189,7 +192,6 @@ function loadToolbox() {
         undoRedoCap = parseInt(maxUndoSetting);
         cursorType = cursorTypeSetting;
         if (cursorType == "crosshair" || cursorType == "both") {
-          console.log("settin ccanvas cursor");
           canvas.style.cursor = "crosshair";
         }
         if (cursorType == "crosshair") {
@@ -225,6 +227,9 @@ function loadToolbox() {
   } else {
     toolbox.style.visibility = "visible";
     canvasDiv.style.display = "block";
+    if (cursorType != "crosshair") {
+      cursor.style.visibility = "visible";
+    }
   }
 }
 
@@ -261,7 +266,7 @@ function fixToolboxPos(type) {
 }
 
 function noContext(e) {
-  if (canvas.matches(':hover')) {
+  if (canvasDiv.matches(':hover')) {
     e.preventDefault();
     return false;
   }
@@ -283,19 +288,15 @@ function updateUndoStack() {
   if (redoStates.length > 0) {
     redoStates = [];
   }
-  console.log(saveStates.length + " > " + parseInt(undoRedoCap+1));
-  console.log(saveStates.length > undoRedoCap+1);
   if (saveStates.length > parseInt(undoRedoCap+1)) {
     console.log("shifting...");
     undoRedoCapBroken = true;
     saveStates.shift();
   }
-  console.log(saveStates);
 }
 
 function undoPath() {
   if (!undoredoAction && saveStates.length > 1) {
-    console.log("undoing");
     undoredoAction = true;
     redoStates.push(saveStates[saveStates.length-1]);
     var toUpdate = [];
@@ -316,13 +317,11 @@ function undoPath() {
                 canvas[state.order].getContext("2d").clearRect(0,0,canvas[state.order].width,canvas[state.order].height);
                 canvas[state.order].getContext("2d").putImageData(state.data,0,0);
                 updated = true
-                console.log("Updated order " + order);
                 break can;
               }
             }
           }
           if (!updated) { 
-            console.log("No previous states for " + order);
             if (!undoRedoCapBroken) {
               canvas[order].getContext("2d").clearRect(0,0,canvas[order].width,canvas[order].height);
             }
@@ -330,7 +329,6 @@ function undoPath() {
         });
       }
       undoredoAction = false;
-      console.log(saveStates);
     })
     changes = true;
   }
@@ -338,7 +336,6 @@ function undoPath() {
 
 function redoPath() {
   if (!undoredoAction && redoStates.length > 0) {
-    console.log("redoing it");
     undoredoAction = true;
     saveStates.push(redoStates[redoStates.length-1]);
     removePathFromStack(redoStates).then((p) => {
@@ -350,8 +347,6 @@ function redoPath() {
       undoredoAction = false;
     })
     changes = true;
-  } else {
-    console.log("not redoing it :(");
   }
 }
 
@@ -511,6 +506,10 @@ function load() {
   console.log("LOADING");
   const canvasData = browser.storage.local.get(webPath);
   canvasData.then((result) => {
+    if (!result[webPath]) {
+      console.log("No save data found");
+      return;
+    }
     toolbox.contentWindow.postMessage(data={command:"addLoadedColors",status:[result[webPath][0][1]]},targetOrigin=toolbox.src);
     const imageData = result[webPath][0][0];
     var images = [];
