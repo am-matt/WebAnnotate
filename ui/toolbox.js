@@ -58,6 +58,11 @@ colorSelector.addEventListener("change", () => {
     }
 })
 
+colorButton.addEventListener("click",()=>{
+    colorAdd="new";
+    colorSelector.click();
+})
+
 function addNewColor(color) {
     const newButton = document.createElement("button");
     newButton.className = "colorButton";

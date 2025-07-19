@@ -15,12 +15,12 @@
                 <i class="fi fi-ss-location-arrow"></i>
             </div>
             <div id="innerMenu">
-                <div id="quickActions">
-                    <button id="undoButton" class="quickButton nodrag"><i class="fi fi-ss-undo"></i></button>
-                    <button id="redoButton" class="quickButton nodrag"><i class="fi fi-ss-redo"></i></button>
+                <div id="quickActions" class="section">
+                    <button id="undoButton" class="quickButton nodrag"><i class="fi fi-sr-undo quick"></i></button>
+                    <button id="redoButton" class="quickButton nodrag"><i class="fi fi-sr-redo quick"></i></button>
                 </div>
 
-                <div id="statusButtons">
+                <div id="statusButtons" class="section">
                     <button id="cursor-button" class="statusButton selected nodrag">
                         <i class="fi fi-sr-cursor action"></i>
                         <div class="glow"></div>
@@ -35,31 +35,36 @@
                     </button>
                 </div>
 
-                <div id="strokeSize">
-                    <label inert for="sizeSlider" class="label">Stroke Size</label>
-                    <input type="range" min="1" max="100" value="10" class="slider nodrag" id="sizeSlider">
+                <div id="strokeSize" class="section">
+                    <div inert class="label">
+                        <span><i class="fi fi-sr-sort-size-up labelicon"></i></span>
+                        Stroke Size
+                    </div>
+                    <div id="sliderOutside">
+                        <input type="range" min="1" max="100" value="10" class="slider nodrag" id="sizeSlider">
+                    </div>
                 </div>
 
-                <div id="colors">
-                    <p inert id="colorLabel">Color select</p>
+                <div id="colors" class="section">
+                    <p inert class="label">
+                        <span><i class="fi fi-sr-fill labelicon"></i></span>
+                        Color
+                    </p>
                     <div id="colorSelection">
                         <div id="colorButtons" class="nodrag">
                         </div>
                         <div id="addNewColorButton" class="nodrag">
-                            +
+                            <i class="fi fi-sr-plus-small action black"></i>
                             <input type="color" id="colorSelector">
                         </div>
                     </div>
                 </div>
 
-                <div id="saveButtons">
-                    <button id="save-button" class="nodrag">Save</button>
-                    <button id="load-button" class="nodrag">Load</button>
-                </div>
-
-                <div id="footerButtons">
-                    <button id="clearBoardButton" class="quickButton nodrag"><i class="fi fi-ss-trash-xmark"></i></button>
-                    <button id="settingsButton" class="quickButton nodrag"><i class="fi fi-ss-settings"></i></button>
+                <div id="footerButtons" class="section">
+                    <button id="save-button" class="quickButton nodrag"><i class="fi fi-sr-disk quick"></i></button>
+                    <button id="load-button" class="quickButton nodrag"><i class="fi fi-sr-cloud-download-alt quick"></i></i></button>
+                    <button id="clearBoardButton" class="quickButton nodrag"><i class="fi fi-ss-trash-xmark quick"></i></button>
+                    <button id="settingsButton" class="quickButton nodrag"><i class="fi fi-ss-settings quick"></i></button>
                 </div>
 
                 <div inert class="label" hidden="true">Uicons by <a href="https://www.flaticon.com/uicons">Flaticon</a></div>
