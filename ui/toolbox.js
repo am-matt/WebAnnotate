@@ -21,11 +21,72 @@ var colorsString = [];
 var mode = cursorButton;
 var colorAdd = "new"
 var dragMode = false;
+var currentPage = 1;
+var totalPages = 1;
 
-/*
-annotationActions = [openclose,updateStatus,save,load,maximizeToolbox,minimizeToolbox,updatePenSize,
-  newColor,updateColors,undoPath,redoPath,clearBoard]
-*/
+const prevColorPage = $("prevColorPage");
+const nextColorPage = $("nextColorPage");
+const pageIndicators = $("pageNum");
+
+console.log(pageIndicators.getAttribute("data-page"));
+
+function switchPage(num) {
+    colors.forEach((button) => {
+        if (button.getAttribute("page") == num) {
+            button.style.visibility = "visible";
+        } else {
+            button.style.visibility = "collapse";
+        }
+    });
+    if (colorButton.getAttribute("page") == num) {
+        colorButton.style.visibility = "visible";
+    } else {
+        colorButton.style.visibility = "collapse";
+    }
+    currentPage = num;
+
+    if (num == 1) {
+        prevColorPage.classList.remove("selectable");
+        Array.from(prevColorPage.children)[0].classList.remove("selectable");
+    } else {
+        prevColorPage.classList.add("selectable");
+        Array.from(prevColorPage.children)[0].classList.add("selectable");
+    }
+
+    if (num <= colors.length/8) {
+        nextColorPage.classList.add("selectable");
+        Array.from(nextColorPage.children)[0].classList.add("selectable");
+    } else {
+        nextColorPage.classList.remove("selectable");
+        Array.from(nextColorPage.children)[0].classList.remove("selectable");
+    }
+
+    Array.from(pageIndicators.children).forEach((indicator)=>{
+        if (parseInt(indicator.getAttribute("data-page")) == num) {
+            indicator.classList.add("current");
+        } else {
+            indicator.classList.remove("current");
+        }
+    })
+}
+
+pageIndicators.addEventListener("click", (e)=> {
+    if (e.target.classList.contains("page")) {
+        switchPage(parseInt(e.target.getAttribute("data-page")));
+    }
+})
+
+nextColorPage.addEventListener("click", () => {
+    if (currentPage <= colors.length/8) {
+        switchPage(currentPage+1);
+    }
+})
+
+prevColorPage.addEventListener("click", () => {
+    if (currentPage > 1) {
+        switchPage(currentPage-1);
+    }
+})
 
 // CSS styles return rgba(r,g,b) format by default but this program uses hex to store colors
 function RGBAToHexA(rgba, forceRemoveAlpha = false) {
@@ -61,22 +122,56 @@ colorSelector.addEventListener("change", () => {
 colorButton.addEventListener("click",()=>{
     colorAdd="new";
     colorSelector.click();
-})
+});
+
+function arc(v) {
+    for (var i = 0; i < v; i++) {
+        try {
+            addNewColor(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
+        } catch(e) {
+            console.log("lmao");
+        }
+        
+    }
+}
 
 function addNewColor(color) {
     const newButton = document.createElement("button");
     newButton.className = "colorButton";
     newButton.style.backgroundColor = color;
+    newButton.classList.add("nodrag");
+
     newButton.onclick = onColorButtonPress;
     newButton.oncontextmenu = removeColor;
+    
+    const currPage = parseInt(colorButton.getAttribute("page"));
+    newButton.setAttribute("page",currPage);
+
     colors.push(newButton);
     colorsString.push(color);
-    colorOptions.appendChild(newButton);
+    colorOptions.insertBefore(newButton,colorButton);
+
+    if (colors.length >= currPage*8) {
+        console.log("new page");
+        const newPageIndicator = document.createElement("div");
+        newPageIndicator.className = "page";
+        newPageIndicator.classList.add("nodrag");
+        newPageIndicator.setAttribute("data-page",currPage+1);
+        pageIndicators.appendChild(newPageIndicator);
+        colorButton.setAttribute("page",currPage+1);
+        colorButton.style.visibility = "collapse";
+        nextColorPage.classList.add("selectable");
+        Array.from(nextColorPage.children)[0].classList.add("selectable");
+        totalPages++;
+    }
+    if (currentPage != currPage) { newButton.style.visibility = "collapse"; }
+
     colorPressed(newButton);
     updateStatus("colorUpdate",[colorsString]);
 }
 
 function removeColor(e) {
+    e.preventDefault();
     if (colors.length > 1) {
         b = e.target;
         var switchColors = false;
@@ -89,6 +184,25 @@ function removeColor(e) {
         colors.splice(i,1);
         b.remove();
         if (switchColors) { colorPressed(colors[0]); }
+
+        if (currentPage != totalPages) {
+            for (var page = currentPage; page < totalPages; page++) {
+                const idx = (8*page)-1;
+                if (idx > colors.length-1) {
+                    colorButton.setAttribute("page",page);
+                    totalPages--;
+                    Array.from(pageIndicators.children).forEach((indi)=>{
+                        if (parseInt(indi.getAttribute("data-page"))==page+1) {
+                            indi.remove();
+                        }
+                    })
+                } else {
+                    const colorToSwap = colors[(8*page)-1];
+                    colorToSwap.setAttribute("page",page);
+                }
+            }
+            switchPage(currentPage);
+        }
         updateStatus("colorUpdate",[colorsString]);
     }
     return false;
@@ -220,6 +334,7 @@ function updateStatus(command, args=null, reason=null, button=null) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    colorButton.setAttribute("page",1);
     const getSettings = browser.storage.local.get("settings");
     getSettings.then((data) => {
         defaultColors = data["settings"][0]["colors"];

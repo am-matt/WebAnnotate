@@ -173,8 +173,8 @@ function loadToolbox() {
           position: fixed;
           top: 15px;
           left: 15px;
-          height: 260px;
-          width: 200px;
+          height: 311px;
+          width: 210px;
           z-index: 999999999999;
           transition: height 0.1s ease-out, width 0.1s ease-out;
         }

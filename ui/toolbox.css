@@ -40,12 +40,14 @@
     position: fixed;
     left: 0px;
     top: 0px;
-    width: 100%;
-    height: 100%;
+    width: 214px;
+    height: 311px;
+    /*width: 100%;
+    height: 100%;*/
     backdrop-filter: blur(2px);
     border: 2px solid white;
     background-color: rgba(0,0,0,0.5);
-    border-radius: 5%; 
+    border-radius: 10%; 
     transition: scale 0.2s linear;
     box-sizing: border-box;
 }
@@ -68,6 +70,8 @@ i.action {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 i.quick {
@@ -78,10 +82,12 @@ i.quick {
 }
 
 .colorButton {
+    padding: 0;
     border: none;
-    height: 25px;
-    width: 25px;
+    height: 30px;
+    width: 30px;
     margin-right: 5px;
+    margin-bottom: 5px;
     border-radius: 100%;
 
     border: solid;
@@ -97,18 +103,87 @@ i.quick {
 }
 
 #colorButtons {
+    margin-left: 27px;
     display: flex;
+    justify-content: left;
+    flex-wrap: wrap;
+    flex-direction: row;
 }
 
 #colorSelection {
-    margin-left: 10px;
     display: flex;
+    justify-content: left;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#pageNum {
+    position: absolute;
+    bottom: 46px;
+
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.page {
+    cursor: pointer;
+    background-color: rgba(92,92,92);
+    width: 5px;
+    height: 5px;
+    margin-right: 3px;
+    border-radius: 100%;
+}
+
+.page.current {
+    background-color: white;
+}
+
+.pageButton {
+    border-radius: 5%;
+    width: 15px;
+    height: 65px;
+}
+
+.pageButton.selectable {
+    cursor: pointer;
+}
+
+.pageButton.selectable:hover {
+    background-color: rgba(255,255,255,0.4);
+}
+
+i.arrow {
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(92,92,92);
+}
+
+i.arrow.selectable {
+    color: white;
+}
+
+#prevColorPage {
+    position: absolute;
+}
+
+#nextColorPage {
+    position: absolute;
+    right: 10px;
 }
 
 #addNewColorButton {
+    border: none;
     border-radius: 100%;
-    height: 25px;
-    width: 25px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    height: 30px;
+    width: 30px;
     cursor: pointer;
     
     background-color: #D9D9D9;
@@ -147,11 +222,11 @@ i.black {
 }
 
 .statusButton:hover {
-    background-color: rgba(70,70,70);
+    background-color: rgba(92,92,92);
 }
 
 .quickButton:hover {
-    background-color: rgba(70,70,70);
+    background-color: rgba(92,92,92);
 }
 
 .statusButton.selected:hover {
@@ -172,19 +247,24 @@ i.black {
 }
 
 #footerButtons {
+    display: flex;
+    position: absolute;
+    bottom: 10px;
     margin-left: 10px;
     margin-top: 10px;
 }
 
 #quickActions {
+    display: flex;
     margin-top: 10px;
-    margin-left: 5px;
+    margin-left: 10px;
 }
 
 .quickButton {
+    padding: 0;
     border: none;
     outline: none;
-    margin-right: 2px;
+    margin-right: 5px;
     border-radius: 100%;
     border: solid white 2px;
     background-color: black;
@@ -243,12 +323,12 @@ i.black {
     padding: 0;
     color: white;
     margin-left: 10px;
-    font-size: 12px;
+    font-size: 16px;
     margin-bottom: 7px;
 }
 
 i.labelicon {
-    font-size: 8px;
+    font-size: 16px;
     vertical-align: middle;
 }
 

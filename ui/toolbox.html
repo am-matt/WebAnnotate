@@ -38,7 +38,7 @@
                 <div id="strokeSize" class="section">
                     <div inert class="label">
                         <span><i class="fi fi-sr-sort-size-up labelicon"></i></span>
-                        Stroke Size
+                        Pen Size
                     </div>
                     <div id="sliderOutside">
                         <input type="range" min="1" max="100" value="10" class="slider nodrag" id="sizeSlider">
@@ -51,20 +51,33 @@
                         Color
                     </p>
                     <div id="colorSelection">
-                        <div id="colorButtons" class="nodrag">
+                        <div class="pageButton nodrag" id="prevColorPage"><i class="fi fi-sr-angle-small-left arrow"></i></div>
+                        <div id="colorButtons">
+                            <button id="addNewColorButton" class="nodrag">
+                                <i class="fi fi-sr-plus-small action black"></i>
+                            </button>
                         </div>
-                        <div id="addNewColorButton" class="nodrag">
-                            <i class="fi fi-sr-plus-small action black"></i>
-                            <input type="color" id="colorSelector">
-                        </div>
+                        <div class="pageButton nodrag" id="nextColorPage"><i class="fi fi-sr-angle-small-right arrow"></i></div>
+                    </div>
+                    <div id="pageNum">
+                        <div class="page current nodrag" data-page="1"></div>
                     </div>
                 </div>
+                <input type="color" id="colorSelector">
 
                 <div id="footerButtons" class="section">
-                    <button id="save-button" class="quickButton nodrag"><i class="fi fi-sr-disk quick"></i></button>
-                    <button id="load-button" class="quickButton nodrag"><i class="fi fi-sr-cloud-download-alt quick"></i></i></button>
-                    <button id="clearBoardButton" class="quickButton nodrag"><i class="fi fi-ss-trash-xmark quick"></i></button>
-                    <button id="settingsButton" class="quickButton nodrag"><i class="fi fi-ss-settings quick"></i></button>
+                    <button id="save-button" class="quickButton nodrag">
+                        <i class="fi fi-sr-disk quick"></i>
+                    </button>
+                    <button id="load-button" class="quickButton nodrag">
+                        <i class="fi fi-sr-cloud-download-alt quick"></i>
+                    </button>
+                    <button id="clearBoardButton" class="quickButton nodrag">
+                        <i class="fi fi-ss-trash-xmark quick"></i>
+                    </button>
+                    <button id="settingsButton" class="quickButton nodrag">
+                        <i class="fi fi-ss-settings quick"></i>
+                    </button>
                 </div>
 
                 <div inert class="label" hidden="true">Uicons by <a href="https://www.flaticon.com/uicons">Flaticon</a></div>
