@@ -1,5 +1,5 @@
 * {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Jersey 25", system-ui;
     user-select: none;
 }
 
@@ -59,7 +59,8 @@
 
 #statusButtons {
     display: flex;
-    justify-content: left;
+    margin-left: -10px;
+    justify-content: center;
     align-items: center;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -81,6 +82,14 @@ i.quick {
     justify-content: center;
 }
 
+i.quickUndoRedo {
+    font-size: 12px;
+    margin-top: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .colorButton {
     padding: 0;
     border: none;
@@ -90,11 +99,22 @@ i.quick {
     margin-bottom: 5px;
     border-radius: 100%;
 
-    border: solid;
-    border-color: white;
-    border-width: 2px;
+    border: 2px solid rgba(255,255,255,0.5);
+
+    background-clip: content-box;
+    padding: 1px;
 
     cursor: pointer;
+
+    transition: scale 0.1s linear;
+}
+
+.colorButton:active {
+    scale: 0.9;
+}
+
+.colorButton.selected {
+    border: 2px solid white;
 }
 
 #colorLabel {
@@ -116,6 +136,7 @@ i.quick {
 #colorSelection {
     display: flex;
     justify-content: center;
+    margin-top: -5px;
 }
 
 #pageNum {
@@ -183,8 +204,15 @@ i.arrow.selectable {
     height: 30px;
     width: 30px;
     cursor: pointer;
+
+    transition: scale 0.1s linear;
+    scale: 0.8;
     
     background-color: #D9D9D9;
+}
+
+#addNewColorButton:active {
+    scale: 0.7;
 }
 
 #colorSelector {
@@ -209,6 +237,7 @@ i.black {
     border: none;
     outline: none;
     margin-left: 10px;
+    margin-bottom: 3px;
     border-radius: 30%;
     height: 48px;
     width: 48px;
@@ -217,10 +246,16 @@ i.black {
     position: relative;
     cursor: pointer;
     overflow: hidden;
+
+    transition: scale 0.1s linear
 }
 
 .statusButton:hover {
     background-color: rgba(92,92,92);
+}
+
+.statusButton:active {
+    scale: 0.9;
 }
 
 .quickButton:hover {
@@ -246,16 +281,16 @@ i.black {
 
 #footerButtons {
     display: flex;
-    position: absolute;
+    justify-content: center;
     bottom: 10px;
-    margin-left: 10px;
     margin-top: 10px;
 }
 
 #quickActions {
     display: flex;
+    margin-bottom: 3px;
     margin-top: 10px;
-    margin-left: 10px;
+    justify-content: center;
 }
 
 .quickButton {
@@ -293,6 +328,7 @@ i.black {
     padding-top: 5px;
     padding-bottom: 5px;
     align-items: center;
+    justify-content: center;
 }
 
 .slider {
@@ -303,6 +339,11 @@ i.black {
     height: 3px;
     border-radius: 5px;
     margin-left: 10px;
+    cursor: grab;
+}
+
+.slider:active {
+    cursor: grabbing;
 }
 
 .slider:hover {
@@ -326,8 +367,7 @@ i.black {
 }
 
 i.labelicon {
-    font-size: 16px;
-    vertical-align: middle;
+    font-size: 12px;
 }
 
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
@@ -340,7 +380,7 @@ i.labelicon {
   border-color: white;
   border-width: 2px;
   background: #000000; /* Green background */
-  cursor: pointer; /* Cursor on hover */
+  transition: border-width 0.1s linear;
 }
 
 .slider::-moz-range-thumb {
@@ -350,7 +390,11 @@ i.labelicon {
   border-width: 2px;
   border-color: white;
   background: #000000; /* Green background */
-  cursor: pointer;
+  transition: border-width 0.1s linear;
+}
+
+.slider::-moz-range-thumb:hover {
+    border-width: 4px;
 }
 
 h1 {
