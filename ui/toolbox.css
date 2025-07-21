@@ -108,6 +108,7 @@ i.quick {
     justify-content: left;
     flex-wrap: wrap;
     flex-direction: row;
+    height: 65px;
 }
 
 #colorSelection {
@@ -118,9 +119,7 @@ i.quick {
 }
 
 #pageNum {
-    position: absolute;
-    bottom: 46px;
-
+    margin-top: 5px;
     width: 100%;
     display: flex;
     justify-content: center;

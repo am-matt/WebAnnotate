@@ -6,6 +6,8 @@ const saveButton = $("save-button")
 const loadButton = $("load-button")
 const eraseButton = $("erase-button")
 const sizeSlider = $("sizeSlider");
+const outerSlider = $("sliderOutside");
+const colorDiv = $("colors");
 const colorButton = $("addNewColorButton");
 const colorSelector = $("colorSelector");
 const colorOptions = $("colorButtons");
@@ -27,8 +29,6 @@ var totalPages = 1;
 const prevColorPage = $("prevColorPage");
 const nextColorPage = $("nextColorPage");
 const pageIndicators = $("pageNum");
-
-console.log(pageIndicators.getAttribute("data-page"));
 
 function switchPage(num) {
     colors.forEach((button) => {
@@ -69,6 +69,28 @@ function switchPage(num) {
         }
     })
 }
+
+sliderOutside.addEventListener("wheel", (e)=>  {
+    var change;
+    if (e.deltaY > 0) {
+        change = -1;
+    } else {
+        change = 1;
+    }
+    sizeSlider.value = parseInt(sizeSlider.value) + parseInt(change*10);
+});
+
+colorDiv.addEventListener("wheel", (e)=> {
+    if (e.deltaY < 0) {
+        if (currentPage > 1) {
+            switchPage(currentPage-1);
+        }
+    } else if (e.deltaY > 0) {
+        if (currentPage <= colors.length/8) {
+            switchPage(currentPage+1);
+        }
+    }
+})
 
 pageIndicators.addEventListener("click", (e)=> {
     if (e.target.classList.contains("page")) {
@@ -129,7 +151,7 @@ function arc(v) {
         try {
             addNewColor(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
         } catch(e) {
-            console.log("lmao");
+            
         }
         
     }
@@ -152,7 +174,6 @@ function addNewColor(color) {
     colorOptions.insertBefore(newButton,colorButton);
 
     if (colors.length >= currPage*8) {
-        console.log("new page");
         const newPageIndicator = document.createElement("div");
         newPageIndicator.className = "page";
         newPageIndicator.classList.add("nodrag");
@@ -183,8 +204,7 @@ function removeColor(e) {
         const i = colors.indexOf(b);
         colors.splice(i,1);
         b.remove();
-        if (switchColors) { colorPressed(colors[0]); }
-
+        
         if (currentPage != totalPages) {
             for (var page = currentPage; page < totalPages; page++) {
                 const idx = (8*page)-1;
@@ -203,6 +223,7 @@ function removeColor(e) {
             }
             switchPage(currentPage);
         }
+        if (switchColors) { colorPressed(colors[0]); }
         updateStatus("colorUpdate",[colorsString]);
     }
     return false;
