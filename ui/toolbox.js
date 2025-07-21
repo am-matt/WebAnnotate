@@ -73,9 +73,9 @@ function switchPage(num) {
 sliderOutside.addEventListener("wheel", (e)=>  {
     var change;
     if (e.deltaY > 0) {
-        change = -1;
-    } else {
         change = 1;
+    } else {
+        change = -1;
     }
     sizeSlider.value = parseInt(sizeSlider.value) + parseInt(change*10);
 });

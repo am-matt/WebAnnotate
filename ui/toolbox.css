@@ -103,9 +103,11 @@ i.quick {
 }
 
 #colorButtons {
-    margin-left: 27px;
     display: flex;
-    justify-content: left;
+    margin-right: -5px;
+    padding-inline: 10px;
+    flex-basis: 140px;
+    justify-self: center;
     flex-wrap: wrap;
     flex-direction: row;
     height: 65px;
@@ -113,9 +115,7 @@ i.quick {
 
 #colorSelection {
     display: flex;
-    justify-content: left;
-    margin-left: 10px;
-    margin-right: 10px;
+    justify-content: center;
 }
 
 #pageNum {
@@ -168,12 +168,11 @@ i.arrow.selectable {
 }
 
 #prevColorPage {
-    position: absolute;
+    align-self: flex-start;
 }
 
 #nextColorPage {
-    position: absolute;
-    right: 10px;
+    align-self: flex-end;
 }
 
 #addNewColorButton {
