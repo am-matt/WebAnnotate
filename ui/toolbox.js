@@ -71,6 +71,7 @@ function switchPage(num) {
 }
 
 sliderOutside.addEventListener("wheel", (e)=>  {
+    e.preventDefault();
     var change;
     if (e.deltaY > 0) {
         change = 1;
@@ -81,6 +82,7 @@ sliderOutside.addEventListener("wheel", (e)=>  {
 });
 
 colorDiv.addEventListener("wheel", (e)=> {
+    e.preventDefault();
     if (e.deltaY < 0) {
         if (currentPage > 1) {
             switchPage(currentPage-1);
@@ -348,7 +350,12 @@ function updateStatus(command, args=null, reason=null, button=null) {
         mode.classList.remove("selected");
         button.classList.add("selected");
         if (collapsed.children[0]) { collapsed.children[0].remove(); }
-        collapsed.appendChild(button.children[0].cloneNode());
+        const newPrev = document.createElement("i");
+        collapsed.appendChild(newPrev);
+        const iconClass = Array.from(button.children[0].classList)
+        for (var i = 0; i < iconClass.length-1; i++) {
+            newPrev.classList.add(iconClass[i]);
+        }
         mode = button;
     }
     browser.runtime.sendMessage({command:command,status:args})

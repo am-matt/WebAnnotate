@@ -31,6 +31,9 @@ var ctx;
 
 var canvasDiv;
 
+var toolboxHeight = 311;
+var toolboxWidth = 215;
+
 function isElementInViewport(el) {
     var rect = el.getBoundingClientRect();
     // DOMRect { x: 8, y: 8, width: 100, height: 100, top: 8, right: 108, bottom: 108, left: 8 }
@@ -164,7 +167,8 @@ function loadToolbox() {
     cursor.inert = true;
     cursor.style.zIndex = canvasDiv.style.zIndex + 1;
     document.body.append(cursor);
-    
+
+    /* 215px x 311px */
     const stylesheet = document.createElement("style");
     stylesheet.textContent = `
         #ext-toolbox {
@@ -173,8 +177,8 @@ function loadToolbox() {
           position: fixed;
           top: 15px;
           left: 15px;
-          height: 311px;
-          width: 210px;
+          height: ${toolboxHeight}px;
+          width: ${toolboxWidth}px;
           z-index: 999999999999;
           transition: height 0.1s ease-out, width 0.1s ease-out;
         }
@@ -244,25 +248,26 @@ function collapseToolbox() {
 
 function expandToolbox() {
   toolbox.contentWindow.postMessage(data={command:"expandToolbox"},targetOrigin=toolbox.src);
-  toolbox.style.height = "260px";
-  toolbox.style.width = "200px";
+  toolbox.style.height = `${toolboxHeight}px`;
+  toolbox.style.width = `${toolboxWidth}px`;
   fixToolboxPos("expand");
 }
 
+//Original: 260x200 
 function fixToolboxPos(type) {
   var multiplier = 1;
   if (type == "expand") { multiplier = -1; }
   if (toolboxAnchor.includes("right")) {
-    toolbox.style.left = noPx(toolbox.style.left) + ((200-60-15)*multiplier) + "px";
+    toolbox.style.left = noPx(toolbox.style.left) + (((toolboxWidth)-60-15)*multiplier) + "px";
   }
   if (toolboxAnchor.includes("bottom")) {
-    toolbox.style.top = noPx(toolbox.style.top) + ((260-60-15)*multiplier) + "px";
+    toolbox.style.top = noPx(toolbox.style.top) + (((toolboxHeight)-60-15)*multiplier) + "px";
   }
   if (toolboxAnchor.includes("xcenter")) {
-    toolbox.style.left = noPx(toolbox.style.left) + ((100-60) * multiplier) + "px";
+    toolbox.style.left = noPx(toolbox.style.left) + (((toolboxWidth/2)-60) * multiplier) + "px";
   }
   if (toolboxAnchor.includes("ycenter")) {
-    toolbox.style.top = noPx(toolbox.style.top) + ((130-60) * multiplier) + "px";
+    toolbox.style.top = noPx(toolbox.style.top) + (((toolboxHeight/2)-60) * multiplier) + "px";
   }
 }
 
