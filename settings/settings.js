@@ -17,13 +17,13 @@ function updateStorage() {
     storage.then((data) => {
         const totalStorageUsage = JSON.stringify(data).length;
         if (totalStorageUsage < 1000) {
-            totalUsageText.innerText = round(totalStorageUsage,2) + "B";
+            totalUsageText.innerText = round(totalStorageUsage,2) + " B";
         } else if (totalStorageUsage < 1000000) {
-            totalUsageText.innerText = round((totalStorageUsage/1000),2) + "KB";
+            totalUsageText.innerText = round((totalStorageUsage/1000),2) + " KB";
         } else if (totalStorageUsage < 1000000000) {
-            totalUsageText.innerText = round((totalStorageUsage/1000000),2) + "MB";
+            totalUsageText.innerText = round((totalStorageUsage/1000000),2) + " MB";
         } else {
-            totalUsageText.innerText = round((totalStorageUsage/1000000000),2) + "GB";
+            totalUsageText.innerText = round((totalStorageUsage/1000000000),2) + " GB";
         }
     })
 
@@ -41,16 +41,18 @@ getStorage.then((data) => {
 
         const linkCell = document.createElement("td");
         linkCell.innerText = ref[0];
+        linkCell.className = "linkCell";
         row.appendChild(linkCell);
 
         const usage = JSON.stringify(ref[1][0]).length;
         const usageCell = document.createElement("td");
+        usageCell.className = "usageCell";
         if (usage < 1000) {
-            usageCell.innerText = round(usage,2) + "B";
+            usageCell.innerText = round(usage,2) + " B";
         } else if (usage < 1000000) {
-            usageCell.innerText = round((usage/1000),2) + "KB";
+            usageCell.innerText = round((usage/1000),2) + " KB";
         } else {
-            usageCell.innerText = round((usage/1000000),2) + "MB";
+            usageCell.innerText = round((usage/1000000),2) + " MB";
         }
         row.appendChild(usageCell);
 
@@ -72,6 +74,7 @@ getStorage.then((data) => {
         const deleteCell = document.createElement("td");
         const deleteButton = document.createElement("button");
         deleteButton.innerText = "Delete";
+        deleteCell.className = "delCell";
         deleteCell.appendChild(deleteButton);
         row.appendChild(deleteCell);
 
@@ -182,7 +185,6 @@ function updateColorsSetting() {
 }
 
 // General Settings Management //
-
 function autoSaveChanged(e) {
     const getSettings = browser.storage.local.get("settings");
     getSettings.then((data) => {

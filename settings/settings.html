@@ -4,36 +4,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="settings.css" />
     <script defer src="settings.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+25&display=swap" rel="stylesheet">
     <title>WebAnnotate Settings</title>
 </head>
     <body>
-        <h1>Settings</h1>
-
         <div id="general">
-            <h3>General:</h3>
-            <label for="autoSaveCheck">Auto-Save</label>
-            <input type="checkbox" id="autoSaveCheck">
-            <br>
-            <label for="maxUndoNum">Max Undo</label>
-            <select name="maxUndoNum" id="maxUndoNum">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="200">200</option>
-            </select>
+            <h3 class="header">General</h3>
+
+            <table id="generalSettings">
+                <tr class="generalRow">
+                    <th class="generalHeading">
+                        <label for="autoSaveCheck">Auto-Save</label>
+                    </th>
+                    <th class="headerInput">
+                        <input type="checkbox" id="autoSaveCheck">
+                    </th>
+                </tr>
+                <tr class="generalRow">
+                    <th class="generalHeading">
+                        <label for="maxUndoNum">Max Undo</label>
+                    </th>
+                    <th class="headerInput">
+                        <select name="maxUndoNum" id="maxUndoNum">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                        </select>
+                    </th>
+                    
+                </tr>
+                <tr class="generalRow">
+                    <th class="generalHeading">
+                        <label for="cursorType">Cursor Type</label>
+                    </th>
+                    <th class="headerInput">
+                        <select name="cursorType" id="cursorType">
+                            <option value="circle">Circle</option>
+                            <option value="crosshair">Crosshair</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </th>
+                </tr>
+            </table>
+
+            
+
+            
+            
             <label for="maxUndoNum" hidden="true" id="memoryWarning">(Higher max undo not recommended for low memory systems)</label>
-            <br>
-            <label for="cursorType">Cursor Type</label>
-            <select name="cursorType" id="cursorType">
-                <option value="circle">Circle</option>
-                <option value="crosshair">Crosshair</option>
-                <option value="both">Both</option>
-            </select>
+
+
+            
+            
+
         </div>
 
         <div id="colors">
-            <h3 id="colorLabel">Default color presets:</h3>
+            <h3 class="header" id="colorLabel">Default Color Presets</h3>
             <div id="colorSelection">
                 <div id="colorButtons">
                 </div>
@@ -46,14 +75,14 @@
 
         <p>Settings will take effect after refreshing the toolbox</p>
 
-        <h3>Storage manager:</h3>
+        <h3 class="header">Storage Manager</h3>
         <p>Total storage used: <span id="totalStorage"></span></p>
 
         <table id="dataTable">
             <tr>
-                <th>Website</th>
-                <th>Space</th>
-                <th>Delete</th>
+                <th id="websiteCol">Website</th>
+                <th id="spaceCol">Space</th>
+                <th id="delCol">Delete</th>
             </tr>
         </table>
 

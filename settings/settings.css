@@ -1,19 +1,115 @@
 * {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Jersey 25", system-ui;
+    user-select: none;
+}
+
+h3 {
+    font-size: 1.467rem;
+    color: white;
 }
 
 table, th, td {
-    border: 1px solid black;
+    color: white;
+}
+
+#dataTable {
+    table-layout: fixed;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 700px;
+}
+
+td {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+label {
+    color: white;
+    margin-right: 10px;
+    font-size: 1.133rem;
+}
+
+p {
+    color: white;
+    font-size: 16px;
 }
 
 body {
+    background-color: #121212;
+}
+
+select {
+    color: black;
+    border: solid 2px white;
+    border-radius: 10px;
     background-color: white;
+    cursor: pointer;
+}
+
+input {
+    cursor: pointer;
+    margin: 0;
+}
+
+#generalSettings {
+    border: none;
+    text-align: left;
+}
+
+.headerInput {
+    border: none;
+    text-align:right;
+}
+
+.generalHeading {
+    border: none;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
+}
+
+#totalStorage {
+    color: #1E90FF;
+}
+
+#websiteCol {
+    text-align: center;
+    border: none;
+    border-bottom: 1px solid white;
+}
+
+#spaceCol {
+    width: 100px;
+    border: none;
+    border-bottom: 1px solid white;
+}
+
+#delCol {
+    width: 100px;
+    border: none;
+    border-bottom: 1px solid white;
+}
+
+.linkCell {
+    mask-image: linear-gradient(-90deg,rgba(255, 255, 255, 0) 0%, rgb(0, 0, 0) 30%);
+    border: none;
 }
 
 .colorButton {
     border: none;
     padding: 15px;
     border: solid black 2px;
+}
+
+.usageCell {
+    text-align: center;
+    border: none;
+}
+
+.delCell {
+    text-align: center;
+    border: none;
 }
 
 #colorSelection {
