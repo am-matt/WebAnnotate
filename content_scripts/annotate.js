@@ -673,7 +673,8 @@ annotationActions = {
   "redoPath": redoPath, 
   "clearBoard": clearBoard,
   "dragToolbox": dragToolbox,
-  "setToolboxPos": setToolboxPos
+  "setToolboxPos": setToolboxPos,
+  "toolboxDOMLoaded": collapseToolbox
 }
 
 browser.runtime.onMessage.addListener((message) => {

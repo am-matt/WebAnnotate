@@ -79,6 +79,7 @@ sliderOutside.addEventListener("wheel", (e)=>  {
         change = -1;
     }
     sizeSlider.value = parseInt(sizeSlider.value) + parseInt(change*10);
+    updateStatus("updatePenSize", [sizeSlider.value]);
 });
 
 colorDiv.addEventListener("wheel", (e)=> {
@@ -372,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
     })
-    
+    updateStatus("toolboxDOMLoaded");
 })
 
 function addLoadedColors(loadedColors) {
