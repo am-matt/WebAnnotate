@@ -40,9 +40,15 @@ getStorage.then((data) => {
         row.className = "dataEntry";
 
         const linkCell = document.createElement("td");
-        linkCell.innerText = ref[0];
+        const link = document.createElement("a");
+        link.href = ref[0];
+        link.target = "_blank";
+        link.innerText = ref[0];
+        linkCell.title = ref[0];
+        linkCell.style.cursor = "pointer";
         linkCell.className = "linkCell";
         row.appendChild(linkCell);
+        linkCell.appendChild(link);
 
         const usage = JSON.stringify(ref[1][0]).length;
         const usageCell = document.createElement("td");
@@ -73,10 +79,13 @@ getStorage.then((data) => {
 
         const deleteCell = document.createElement("td");
         const deleteButton = document.createElement("button");
-        deleteButton.innerText = "Delete";
+        deleteButton.className = "delButton";
         deleteCell.className = "delCell";
         deleteCell.appendChild(deleteButton);
         row.appendChild(deleteCell);
+        const delIcon = document.createElement("i");
+        delIcon.className = "fi fi-ss-trash-xmark";
+        deleteButton.appendChild(delIcon);
 
         deleteButton.addEventListener("click", (e) => {
             row.remove();

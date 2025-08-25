@@ -176,6 +176,11 @@ function addNewColor(color) {
     colorsString.push(color);
     colorOptions.insertBefore(newButton,colorButton);
 
+    const glow = document.createElement("div");
+    glow.className = "shadow";
+    glow.inert = true;
+    newButton.appendChild(glow);
+
     if (colors.length >= currPage*8) {
         const newPageIndicator = document.createElement("div");
         newPageIndicator.className = "page";

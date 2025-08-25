@@ -5,9 +5,18 @@
     <link rel="stylesheet" href="settings.css" />
     <script defer src="settings.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Jersey+25&display=swap" rel="stylesheet">
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
     <title>WebAnnotate Settings</title>
 </head>
     <body>
+        <div id="heading">
+            <h1>WebAnnotate <span class="smallyellow">Version 1.0</span></h1>
+            <a class="linkAdA linkAd" href="https://mattcoding.com/" target="_blank">mattcoding.com</a>
+            <p class="linkAd">Uicons by <a class="linkAdA" href="https://www.flaticon.com/uicons" target="_blank">Flaticon</a></p>
+        </div>
+
         <div id="general">
             <h3 class="header">General</h3>
 
@@ -49,16 +58,7 @@
                 </tr>
             </table>
 
-            
-
-            
-            
             <label for="maxUndoNum" hidden="true" id="memoryWarning">(Higher max undo not recommended for low memory systems)</label>
-
-
-            
-            
-
         </div>
 
         <div id="colors">
@@ -67,7 +67,7 @@
                 <div id="colorButtons">
                 </div>
                 <div id="addNewColorButton">
-                    +
+                    <i class="fi fi-sr-plus-small action black"></i>
                     <input type="color" id="colorSelector">
                 </div>
             </div>
