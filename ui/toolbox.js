@@ -172,6 +172,7 @@ function addNewColor(color) {
     const newButton = document.createElement("button");
     newButton.className = "colorButton";
     newButton.style.backgroundColor = color;
+    newButton.title = `Color ${color}\nLeft-Click to Select\nRight-Click to Remove`;
     newButton.classList.add("nodrag");
 
     newButton.onclick = onColorButtonPress;
