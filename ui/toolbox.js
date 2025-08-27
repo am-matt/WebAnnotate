@@ -17,6 +17,14 @@ const clearBoardButton = $("clearBoardButton");
 const settingsButton = $("settingsButton");
 const collapsed = $("collapsed");
 const innerMenu = $("innerMenu");
+
+const popup = $("popup");
+const innerPopup = $("innerPopup")
+const popupHeader = $("popupMessageHeader");
+const popupMessage = $("popupMessage");
+const popupButtons = $("popupOptions");
+var activePopup = false;
+
 var defaultColors = ["#FF0000","#00FF00","#0000FF"] // gets replaced by settings anyways
 var colors = [];
 var colorsString = [];
@@ -330,9 +338,16 @@ redoButton.addEventListener("click", () => {
 })
 
 clearBoardButton.addEventListener("click", () => {
-    if (window.confirm("Clear board?")) {
-        updateStatus("clearBoard")
-    }
+    newPopup(
+        "Clear board?",
+        "This action will erase everything!",
+        [
+            ["Yes", ()=>{
+                updateStatus("clearBoard"); 
+            }],
+            ["No"]
+        ]
+    );
 })
 
 settingsButton.addEventListener("click", () => {
@@ -367,6 +382,29 @@ function updateStatus(command, args=null, reason=null, button=null) {
     browser.runtime.sendMessage({command:command,status:args})
 }
 
+function newPopup(header,message,options=[]) {
+    activePopup = true;
+    popupHeader.innerText = header;
+    popupMessage.innerText = message;
+    popup.style.visibility = "visible";
+    options.forEach((option)=> {
+        const button = document.createElement("button");
+        button.className = "popupChoice";
+        button.innerText = option[0];
+        button.onclick = () => {
+            if (option[1]) {
+                option[1]();
+            }
+            popup.style.visibility = "collapse";
+            while (popupButtons.lastElementChild) {
+                popupButtons.removeChild(popupButtons.lastElementChild);
+            }
+            activePopup = false;
+        }
+        popupButtons.append(button);
+    })
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     colorButton.setAttribute("page",1);
     const getSettings = browser.storage.local.get("settings");
@@ -393,12 +431,18 @@ function collapseToolbox() {
     innerMenu.classList.add("hidden");
     menu.classList.add("collapsed");
     collapsed.style.visibility = "visible";
+    if (activePopup) {
+        popup.style.visibility = "collapse";
+    }
 }
 
 function expandToolbox() {
     innerMenu.classList.remove("hidden");
     menu.classList.remove("collapsed");
     collapsed.style.visibility = "hidden";
+    if (activePopup) {
+        popup.style.visibility = "visible";
+    }
 }
 
 const toolboxActions = {
