@@ -420,6 +420,10 @@ document.addEventListener("DOMContentLoaded", () => {
     updateStatus("toolboxDOMLoaded");
 })
 
+document.addEventListener("visibilitychange", () => {
+    updateStatus("save",args=[true]);
+})
+
 function addLoadedColors(loadedColors) {
     loadedColors.forEach((c) => {
         if (!colorsString.includes(c)) {

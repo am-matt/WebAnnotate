@@ -481,17 +481,20 @@ function clearBoard() {
   canvasDiv.focus();
 }
 
-async function save() {
-  console.log("TRYING TO SAVE");
-  const canvasData = [];
-  canvas.forEach((c)=> {
-    canvasData.push(c.toDataURL());
-  })
-  const save = browser.storage.local.set({[webPath]:[[canvasData,colors]]});
-  save.then(() => {
-    console.log("SAVED");
-    changes = false;
-  }, onError)
+async function save(autosaveRequired=false) {
+  if (!autosaveRequired || (autosaveRequired && autosave)) {
+    console.log("TRYING TO SAVE");
+    const canvasData = [];
+    canvas.forEach((c)=> {
+      canvasData.push(c.toDataURL());
+    })
+    const save = browser.storage.local.set({[webPath]:[[canvasData,colors]]});
+    save.then(() => {
+      console.log("SAVED");
+      changes = false;
+    }, onError)
+  }
+
 }
 
 function loadImage(src) {
