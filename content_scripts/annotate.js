@@ -142,6 +142,16 @@ function createCanvases() {
 const pixelLimit = 5000000;
 function loadToolbox() {
   if (!toolbox) {
+    const mainFrame = document.createElement("iframe");
+    const txt = document.documentElement.outerHTML;
+    mainFrame.srcdoc = txt;
+    mainFrame.style.width = document.body.clientWidth + "px";
+    mainFrame.style.height = document.body.clientHeight + "px";
+    document.body.innerHTML = "";
+    document.body.appendChild(mainFrame);
+
+    document.body.style.overflow = "hidden"
+
     console.log("loading toolbox....")
     const iframe = document.createElement("iframe");
     iframe.id = 'ext-toolbox';
@@ -236,6 +246,30 @@ function loadToolbox() {
       cursor.style.visibility = "visible";
     }
   }
+
+  
+  
+
+  /*// Wrap everything in new DIV (im sure everything will go very well)
+  const siteDiv = document.createElement("div");
+  document.body.style = "width: 1504px; min-width: 1504px; margin: auto 0;";
+  siteDiv.id = "webannotate-sitediv";
+  ;[ ...document.body.childNodes ].forEach(child => siteDiv.appendChild(child));
+  document.body.appendChild(siteDiv);*/
+
+  // check every rule and find the media queries
+  /*[...document.styleSheets].forEach((stylesheet) => {
+    const rules = stylesheet.cssRules;
+    for (let i = 0; i < rules.length; i++) {
+      if (rules[i].media) {
+        const mediaQueryList = window.matchMedia(rules[i].conditionText);
+        if (!mediaQueryList.matches) {
+          console.log(rules[i]);
+          stylesheet.deleteRule(i);
+        }
+      }
+    }
+  })*/
 }
 
 function collapseToolbox() {
