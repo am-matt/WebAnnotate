@@ -1,3 +1,5 @@
+var activeTabs = [];
+
 function onError(error) {
     console.error(`Error: ${error}`);
 }
@@ -5,12 +7,30 @@ function onError(error) {
 // Annotation Script Adding
 
 function openclose(tabs) {
+    if (!getTab(tabs[0].id)) {
+        activeTabs.push([tabs[0].id,tabs[0].width]);
+    }
     browser.tabs.sendMessage(tabs[0].id, {command: "openclose"});
+}
+
+function getTab(id) {
+    for (let i = 0; i < activeTabs.length; i++) {
+        if (activeTabs[i][0] == id) {
+            return i;
+        }
+    }
+    return null;
 }
 
 browser.tabs.onUpdated.addListener(function(tabId, changeInfo) {
     if (changeInfo.status == "complete") {
         browser.tabs.executeScript(tabId, {file: "content_scripts/annotate.js"})
+    }
+})
+
+browser.tabs.onRemoved.addListener((id)=>{
+    if (getTab(id) != null) {
+        activeTabs.splice(getTab(id),1);
     }
 })
 
@@ -26,10 +46,15 @@ function searchForWindowById(id) {
 }
 function checkForWindowResize() {
     windowData.forEach((window)=> {
-        const getActualWindow = browser.windows.get(window.id);
+        const getActualWindow = browser.windows.get(window.id,getInfo={populate:true});
         getActualWindow.then((actualWindow)=>{
             if (actualWindow.width != window.width) {
-                console.log("Old Width: " + window.width + " New Width: " + actualWindow.width);
+                // check tabs of importance
+                actualWindow.tabs.forEach((tab)=>{
+                    if (getTab(tab.id) != null) {
+                        browser.tabs.setZoom(tab.id,actualWindow.width/activeTabs[getTab(tab.id)][1]);
+                    }
+                })
                 windowData[windowData.indexOf(window)] = actualWindow;
             }
         });
