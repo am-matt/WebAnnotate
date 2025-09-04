@@ -20,6 +20,8 @@ var toolboxAnchor = [];
 var saveStates = [];
 var redoStates = [];
 
+var consWidth;
+
 var undoRedoCapBroken = false;
 
 var maxCanvasHeight;
@@ -116,14 +118,16 @@ function createCanvases() {
       })
     } else {
       canvasDiv = document.createElement("div");
+      canvasDiv.style.width = consWidth + "px";
+      canvasDiv.style.margin = "auto";
       canvasDiv.id = "webannotate-canvasdiv";
       canvasDiv.style.position = "absolute";
       canvasDiv.style.display = "block";
       canvasDiv.style.verticalAlign = "top";
       canvasDiv.style.cursor = "none";
+      canvasDiv.style.margin = "auto";
       canvasDiv.style.zIndex = 999999999;
       canvasDiv.style.top = 0;
-      canvasDiv.style.left = 0;
       canvasDiv.style.lineHeight = "0px";
       canvasDiv.inert = true;
       document.body.append(canvasDiv);
@@ -139,10 +143,16 @@ function createCanvases() {
     }
 }
 
+
+
 const pixelLimit = 5000000;
 function loadToolbox() {
   if (!toolbox) {
     console.log("loading toolbox....")
+    consWidth = window.innerWidth;
+    document.documentElement.style.width = consWidth + "px";
+    document.documentElement.style.margin = "auto";
+
     const iframe = document.createElement("iframe");
     iframe.id = 'ext-toolbox';
     iframe.allowTransparency = true;
@@ -210,6 +220,8 @@ function loadToolbox() {
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener('keydown', keyPressHandler);
+
+    
 
     addEventListener("beforeunload", (e) => {
       if (autosave) {
