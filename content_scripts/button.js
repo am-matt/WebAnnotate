@@ -1,4 +1,4 @@
-var activeTabs = [];
+var activeTabs = []; // [[tabId, mainWidth, defaultZoomLevel, toolboxOpened]]
 
 function onError(error) {
     console.error(`Error: ${error}`);
@@ -7,8 +7,15 @@ function onError(error) {
 // Annotation Script Adding
 
 function openclose(tabs) {
-    if (!getTab(tabs[0].id)) {
-        activeTabs.push([tabs[0].id,tabs[0].width]);
+    const tab = getTab(tabs[0].id);
+    if (tab == null) {
+        const getZoom = browser.tabs.getZoom(tabs[0].id);
+        getZoom.then((level)=>{
+            console.log(level);
+            activeTabs.push([tabs[0].id,tabs[0].width,level,true]);
+        });
+    } else {
+        activeTabs[tab][3] = !activeTabs[tab][3];
     }
     browser.tabs.sendMessage(tabs[0].id, {command: "openclose"});
 }
@@ -51,7 +58,9 @@ function checkForWindowResize() {
             if (actualWindow.width != window.width) {
                 // check tabs of importance
                 actualWindow.tabs.forEach((tab)=>{
-                    if (getTab(tab.id) != null) {
+                    const currTab = getTab(tab.id);
+                    if (currTab != null && activeTabs[currTab][3]) {
+                        activeTabs[getTab(tab.id)][2] = actualWindow.width/activeTabs[getTab(tab.id)][1];
                         browser.tabs.setZoom(tab.id,actualWindow.width/activeTabs[getTab(tab.id)][1]);
                     }
                 })
@@ -79,6 +88,23 @@ browser.windows.onRemoved.addListener((window)=>{
 })
 getAllCurrentWindows();
 setInterval(checkForWindowResize, 100);
+
+browser.tabs.onZoomChange.addListener((e)=>{
+    const currTab = getTab(e.tabId);
+    if (currTab != null 
+        && e.newZoomFactor != activeTabs[currTab][2] 
+        && e.oldZoomFactor == activeTabs[currTab][2]
+        && activeTabs[currTab][3]) {
+        if (e.newZoomFactor > e.oldZoomFactor) {
+            console.log("zooming in");
+            browser.tabs.sendMessage(e.tabId, {command:"zoom",status:["in"]})
+        } else {
+            console.log("zooming out");
+            browser.tabs.sendMessage(e.tabId, {command:"zoom",status:["out"]});
+        }
+        browser.tabs.setZoom(e.tabId,activeTabs[currTab][2]);
+    }
+});
 
 // Button Click
 browser.browserAction.onClicked.addListener(() => {

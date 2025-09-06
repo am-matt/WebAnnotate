@@ -220,10 +220,10 @@ function loadToolbox() {
     document.addEventListener("mousemove", handleMouseMoveEvent);
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
-    document.addEventListener('keydown', keyPressHandler);
+    window.addEventListener('keydown', keyPressHandler);
 
-    document.addEventListener("wheel",(e)=>{
-      if (e.ctrlKey) {
+    window.addEventListener("wheel",(e)=>{
+      if (e.ctrlKey && opened) {
         if (e.deltaY > 0) {
           zoom("out");
         } else {
@@ -590,6 +590,7 @@ function zoom(type) {
   if (type == "out") { effect = -1 * effect; }
   if (type == "out" && currentZoom <= 0.25) { return; }
   if (type == "in" && currentZoom >= 5) { return; }
+  toolbox.style.zoom = (1/(currentZoom+effect));
   document.documentElement.style.zoom = currentZoom + effect;
   currentZoom = currentZoom + effect;
   
@@ -602,12 +603,12 @@ function keyPressHandler(e) {
       else if (e.ctrlKey && e.keyCode == 90) {
         undoPath();
       }
-      else if (e.ctrlKey && e.keyCode == 61) {
+      else if (e.ctrlKey && e.keyCode == 61 && opened) {
         // zoom in
         zoom("in");
         e.preventDefault();
       }
-      else if (e.ctrlKey && e.keyCode == 173) {
+      else if (e.ctrlKey && e.keyCode == 173 && opened) {
         // zoom out
         zoom("out");
         e.preventDefault();
@@ -720,7 +721,8 @@ annotationActions = {
   "clearBoard": clearBoard,
   "dragToolbox": dragToolbox,
   "setToolboxPos": setToolboxPos,
-  "toolboxDOMLoaded": collapseToolbox
+  "toolboxDOMLoaded": collapseToolbox,
+  "zoom": zoom
 }
 
 browser.runtime.onMessage.addListener((message) => {
