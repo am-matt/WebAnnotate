@@ -152,6 +152,7 @@ function loadToolbox() {
     consWidth = window.innerWidth;
     document.documentElement.style.width = consWidth + "px";
     document.documentElement.style.margin = "auto";
+    document.documentElement.style.zoom = 1;
 
     const iframe = document.createElement("iframe");
     iframe.id = 'ext-toolbox';
@@ -221,7 +222,16 @@ function loadToolbox() {
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener('keydown', keyPressHandler);
 
-    
+    document.addEventListener("wheel",(e)=>{
+      if (e.ctrlKey) {
+        if (e.deltaY > 0) {
+          zoom("out");
+        } else {
+          zoom("in");
+        }
+        e.preventDefault();
+      }
+    },{passive:false});
 
     addEventListener("beforeunload", (e) => {
       if (autosave) {
@@ -574,12 +584,33 @@ function onError(e) {
   canvas.height = window.innerHeight;
 }*/
 
+var currentZoom = 1;
+function zoom(type) {
+  var effect = 0.25;
+  if (type == "out") { effect = -1 * effect; }
+  if (type == "out" && currentZoom <= 0.25) { return; }
+  if (type == "in" && currentZoom >= 5) { return; }
+  document.documentElement.style.zoom = currentZoom + effect;
+  currentZoom = currentZoom + effect;
+  
+}
+
 function keyPressHandler(e) {
       if (e.ctrlKey && e.shiftKey && e.keyCode == 90) {
         redoPath();
       }
       else if (e.ctrlKey && e.keyCode == 90) {
         undoPath();
+      }
+      else if (e.ctrlKey && e.keyCode == 61) {
+        // zoom in
+        zoom("in");
+        e.preventDefault();
+      }
+      else if (e.ctrlKey && e.keyCode == 173) {
+        // zoom out
+        zoom("out");
+        e.preventDefault();
       }
 }
 
