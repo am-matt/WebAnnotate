@@ -392,8 +392,7 @@ function isHovering(element1, element2) {
 }
 
 function getOffsetX(value) {
-  console.log(document.documentElement.getBoundingClientRect().left);
-  return (value/currentZoom)-(document.documentElement.getBoundingClientRect().left/webZoom*currentZoom);
+  return ((value-document.documentElement.getBoundingClientRect().left-window.scrollX)/currentZoom);
 }
 
 function getOffsetY(value) {
