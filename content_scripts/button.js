@@ -32,6 +32,10 @@ function getTab(id) {
 browser.tabs.onUpdated.addListener(function(tabId, changeInfo) {
     if (changeInfo.status == "complete") {
         browser.tabs.executeScript(tabId, {file: "content_scripts/annotate.js"})
+        const tab = getTab(tabId);
+        if (tab != null) {
+            activeTabs.splice(tab,1);
+        }
     }
 })
 
@@ -62,6 +66,7 @@ function checkForWindowResize() {
                     if (currTab != null && activeTabs[currTab][3]) {
                         activeTabs[getTab(tab.id)][2] = actualWindow.width/activeTabs[getTab(tab.id)][1];
                         browser.tabs.setZoom(tab.id,actualWindow.width/activeTabs[getTab(tab.id)][1]);
+                        browser.tabs.sendMessage(tab.id, {command:"zoom",status:["adjustToolbox",actualWindow.width/activeTabs[getTab(tab.id)][1]]});
                     }
                 })
                 windowData[windowData.indexOf(window)] = actualWindow;
@@ -93,16 +98,14 @@ browser.tabs.onZoomChange.addListener((e)=>{
     const currTab = getTab(e.tabId);
     if (currTab != null 
         && e.newZoomFactor != activeTabs[currTab][2] 
-        && e.oldZoomFactor == activeTabs[currTab][2]
         && activeTabs[currTab][3]) {
+        browser.tabs.setZoom(e.tabId,activeTabs[currTab][2]);
         if (e.newZoomFactor > e.oldZoomFactor) {
-            console.log("zooming in");
             browser.tabs.sendMessage(e.tabId, {command:"zoom",status:["in"]})
         } else {
-            console.log("zooming out");
             browser.tabs.sendMessage(e.tabId, {command:"zoom",status:["out"]});
         }
-        browser.tabs.setZoom(e.tabId,activeTabs[currTab][2]);
+        
     }
 });
 

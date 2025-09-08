@@ -22,6 +22,9 @@ var redoStates = [];
 
 var consWidth;
 
+var currentZoom = 1;
+var webZoom = 1;
+
 var undoRedoCapBroken = false;
 
 var maxCanvasHeight;
@@ -261,6 +264,7 @@ function loadToolbox() {
 }
 
 function collapseToolbox() {
+  toolbox.style.transition = "all 0.2s ease-out";
   toolbox.contentWindow.postMessage(data={command:"collapseToolbox"},targetOrigin=toolbox.src);
   toolbox.style.height = "60px";
   toolbox.style.width = "60px";
@@ -269,6 +273,7 @@ function collapseToolbox() {
 }
 
 function expandToolbox() {
+  toolbox.style.transition = "all 0.2s ease-out";
   toolbox.contentWindow.postMessage(data={command:"expandToolbox"},targetOrigin=toolbox.src);
   toolbox.style.height = `${toolboxHeight}px`;
   toolbox.style.width = `${toolboxWidth}px`;
@@ -386,6 +391,15 @@ function isHovering(element1, element2) {
   );
 }
 
+function getOffsetX(value) {
+  console.log(document.documentElement.getBoundingClientRect().left);
+  return (value/currentZoom)-(document.documentElement.getBoundingClientRect().left/webZoom*currentZoom);
+}
+
+function getOffsetY(value) {
+  return (value/currentZoom);
+}
+
 function onMouseDown(e) {
   if (mode == "draw" || mode == "erase") {
     canvasDiv.setPointerCapture(e.pointerId);
@@ -400,7 +414,7 @@ function onMouseDown(e) {
       ctx.lineCap = "round";
       ctx.lineWidth = penWidth;
       ctx.beginPath();
-      ctx.moveTo(e.pageX, getCorrectY(e.pageY,c.getAttribute("order")));
+      ctx.moveTo(getOffsetX(e.pageX), getCorrectY(getOffsetY(e.pageY),c.getAttribute("order")));
     })
   }
 }
@@ -409,9 +423,9 @@ function onMouseUp(e) {
   if ((mode == "draw" || mode == "erase") && e.button == 0) {
     canvasDiv.releasePointerCapture(e.pointerId);
     if (mode == "draw") {
-      draw(e.pageX,e.pageY);
+      draw(getOffsetX(e.pageX),getOffsetY(e.pageY));
     } else if (mode == "erase") {
-      erase(e.pageX,e.pageY);
+      erase(getOffsetX(e.pageX),getOffsetY(e.pageY));
     }
     changes = true;
     updateUndoStack();
@@ -425,11 +439,12 @@ function getCorrectY(pageY,currOrder) {
 }
 
 function handleMouseMoveEvent(e) {
+  document.documentElement.style.transformOrigin = `${e.clientX}px ${e.clientY}px`;
   updateCursor(e);
   if (mode == "draw" && e.buttons == 1) {
-    draw(e.pageX,e.pageY);
+    draw(getOffsetX(e.pageX),getOffsetY(e.pageY));
   } else if (mode == "erase" && e.buttons == 1) {
-    erase(e.pageX,e.pageY);
+    erase(getOffsetX(e.pageX),getOffsetY(e.pageY));
   }
 }
 
@@ -437,8 +452,8 @@ function updateCursor(e) {
   cursor.style.height = penWidth + "px";
   cursor.style.width = penWidth + "px";
   cursor.style.borderRadius = penWidth + "px";
-  cursor.style.left = e.clientX + "px";
-  cursor.style.top = e.clientY + "px";
+  cursor.style.left = (e.clientX / currentZoom) + "px";
+  cursor.style.top = (e.clientY / currentZoom) + "px";
 
   if (mode == "cursor") {
     cursor.style.opacity = 0;
@@ -584,16 +599,21 @@ function onError(e) {
   canvas.height = window.innerHeight;
 }*/
 
-var currentZoom = 1;
-function zoom(type) {
+function zoom(type,globalZoom) {
+  toolbox.style.transition = "none";
   var effect = 0.25;
+  if (type == "adjustToolbox") {
+    webZoom = globalZoom;
+    toolbox.style.zoom = (1/(currentZoom*webZoom));
+    setToolboxPos();
+    return;
+  }
   if (type == "out") { effect = -1 * effect; }
   if (type == "out" && currentZoom <= 0.25) { return; }
   if (type == "in" && currentZoom >= 5) { return; }
-  toolbox.style.zoom = (1/(currentZoom+effect));
-  document.documentElement.style.zoom = currentZoom + effect;
   currentZoom = currentZoom + effect;
-  
+  toolbox.style.zoom = (1/(currentZoom*webZoom));
+  document.documentElement.style.zoom = currentZoom;
 }
 
 function keyPressHandler(e) {
@@ -638,6 +658,7 @@ function noPx(css) {
 }
 
 function setToolboxPos() {
+  toolbox.style.transition = "all 0.2s ease-out";
   toolboxAnchor = [];
   var margin = 15;
   var newX;
@@ -646,8 +667,8 @@ function setToolboxPos() {
   var menuHeight = toolbox.clientHeight;
   var currentX = parseInt(getComputedStyle(toolbox).left.replace('px','')) + (menuWidth/2);
   var currentY = parseInt(getComputedStyle(toolbox).top.replace('px','')) + (menuHeight/2);
-  var viewportWidth = window.innerWidth;
-  var viewportHeight = window.innerHeight;
+  var viewportWidth = window.innerWidth * webZoom;
+  var viewportHeight = window.innerHeight * webZoom;
   var centerX = viewportWidth / 2;
   var centerY = viewportHeight / 2;
   var xFromCenter = Math.abs(centerX - currentX);
@@ -701,7 +722,7 @@ function setToolboxPos() {
     }
   }
 
-  toolbox.style.transition = "all 0.2s ease-out";
+  
   toolbox.style.left = newX;
   toolbox.style.top = newY;
 }
@@ -722,7 +743,7 @@ annotationActions = {
   "dragToolbox": dragToolbox,
   "setToolboxPos": setToolboxPos,
   "toolboxDOMLoaded": collapseToolbox,
-  "zoom": zoom
+  "zoom": zoom,
 }
 
 browser.runtime.onMessage.addListener((message) => {
