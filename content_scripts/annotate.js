@@ -119,6 +119,7 @@ function createCanvases() {
       c.forEach((ele) => {
         ele.remove();
       })
+      canvasDiv.style.width = consWidth + "px";
     } else {
       canvasDiv = document.createElement("div");
       canvasDiv.style.width = consWidth + "px";
@@ -134,6 +135,15 @@ function createCanvases() {
       canvasDiv.style.lineHeight = "0px";
       canvasDiv.inert = true;
       document.body.append(canvasDiv);
+
+      canvasDiv.addEventListener("mouseover",()=>{
+        if (cursorType != "crosshair") {
+          cursor.style.visibility = "visible";
+        }
+      })
+      canvasDiv.addEventListener("mouseout",()=>{
+        cursor.style.visibility = "hidden";
+      })
     }
     var remainingHeight = webHeight;
     for (var ct = 0; ct < canvasToMake; ct++) {
@@ -145,8 +155,6 @@ function createCanvases() {
       }
     }
 }
-
-
 
 const pixelLimit = 5000000;
 function loadToolbox() {
@@ -237,6 +245,7 @@ function loadToolbox() {
     },{passive:false});
 
     addEventListener("beforeunload", (e) => {
+      browser.runtime.sendMessage({command:"tabClosing"});
       if (autosave) {
         save();
       } else if (changes) {
@@ -524,7 +533,7 @@ async function save(autosaveRequired=false) {
     canvas.forEach((c)=> {
       canvasData.push(c.toDataURL());
     })
-    const save = browser.storage.local.set({[webPath]:[[canvasData,colors]]});
+    const save = browser.storage.local.set({[webPath]:[[canvasData,colors,consWidth]]});
     save.then(() => {
       console.log("SAVED");
       changes = false;
@@ -556,6 +565,13 @@ function load() {
       return;
     }
     toolbox.contentWindow.postMessage(data={command:"addLoadedColors",status:[result[webPath][0][1]]},targetOrigin=toolbox.src);
+    if (result[webPath][0][2] != consWidth) {
+      // need to adjust zoom to account for load width
+      consWidth = result[webPath][0][2];
+      document.documentElement.style.width = consWidth + "px";
+      createCanvases();
+      browser.runtime.sendMessage({command:"updateWidth",status:[consWidth]});
+    }
     const imageData = result[webPath][0][0];
     var images = [];
     for (var i = 0; i < canvas.length; i++) {

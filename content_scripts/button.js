@@ -12,7 +12,7 @@ function openclose(tabs) {
         const getZoom = browser.tabs.getZoom(tabs[0].id);
         getZoom.then((level)=>{
             console.log(level);
-            activeTabs.push([tabs[0].id,tabs[0].width,level,true]);
+            activeTabs.push([tabs[0].id,tabs[0].width,level,true,level]);
         });
     } else {
         activeTabs[tab][3] = !activeTabs[tab][3];
@@ -40,7 +40,8 @@ browser.tabs.onUpdated.addListener(function(tabId, changeInfo) {
 })
 
 browser.tabs.onRemoved.addListener((id)=>{
-    if (getTab(id) != null) {
+    const tab = getTab(id);
+    if (tab != null) {
         activeTabs.splice(getTab(id),1);
     }
 })
@@ -64,15 +65,18 @@ function checkForWindowResize() {
                 actualWindow.tabs.forEach((tab)=>{
                     const currTab = getTab(tab.id);
                     if (currTab != null && activeTabs[currTab][3]) {
-                        activeTabs[getTab(tab.id)][2] = actualWindow.width/activeTabs[getTab(tab.id)][1];
-                        browser.tabs.setZoom(tab.id,actualWindow.width/activeTabs[getTab(tab.id)][1]);
-                        browser.tabs.sendMessage(tab.id, {command:"zoom",status:["adjustToolbox",actualWindow.width/activeTabs[getTab(tab.id)][1]]});
+                        updateZoom(actualWindow,tab);
                     }
                 })
                 windowData[windowData.indexOf(window)] = actualWindow;
             }
         });
     });
+}
+function updateZoom(actualWindow,tab) {
+    activeTabs[getTab(tab.id)][2] = actualWindow.width/activeTabs[getTab(tab.id)][1];
+    browser.tabs.setZoom(tab.id,actualWindow.width/activeTabs[getTab(tab.id)][1]);
+    browser.tabs.sendMessage(tab.id, {command:"zoom",status:["adjustToolbox",actualWindow.width/activeTabs[getTab(tab.id)][1]]});
 }
 function getAllCurrentWindows() {
     const getWindows = browser.windows.getAll();
@@ -127,6 +131,22 @@ browser.runtime.onMessage.addListener((message,sender) => {
           url: "settings/settings.html",
         };
         var creating = browser.tabs.create(createData);
+    } else if (message.command == "updateWidth") {
+        const currTab = getTab(sender.tab.id);
+        if (currTab != null) {
+            activeTabs[currTab][1] = message.status[0];
+            const getWindow = browser.windows.get(sender.tab.windowId);
+            getWindow.then((actualWindow)=>{
+                updateZoom(actualWindow,sender.tab);
+            })
+        }
+    } else if (message.command == "tabClosing") {
+        const tab = getTab(sender.tab.id);
+        if (tab != null) {
+            const originalZoom = activeTabs[tab][4];
+            activeTabs.splice(tab,1);
+            browser.tabs.setZoom(sender.tab.id,originalZoom);
+        }
     } else {
         browser.tabs.sendMessage(sender.tab.id, {command: message.command, status: message.status});
     }
