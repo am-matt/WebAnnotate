@@ -123,7 +123,7 @@ function createCanvases() {
     } else {
       canvasDiv = document.createElement("div");
       canvasDiv.style.width = consWidth + "px";
-      canvasDiv.style.touchAction = "none";
+      //canvasDiv.style.touchAction = "none";
       canvasDiv.style.margin = "auto";
       canvasDiv.id = "webannotate-canvasdiv";
       canvasDiv.style.position = "absolute";
@@ -490,23 +490,27 @@ var currPressure = 0.0;
 var currWidthOverall = penWidth;
 function draw(x,y,e) {
   if (canvasDiv && toolbox.style.visibility != "hidden") {
+    var updatePressure = false;
+    if (currPressure != parseFloat(e.pressure)) {
+      currPressure = parseFloat(e.pressure);
+      updatePressure = true;
+    }
     canvas.forEach((c) => {
       if (isElementInViewport(c)) {
         if (isHovering(c,cursor) && !canvasWithChanges.includes(c)) {
           canvasWithChanges.push(c); 
         }
         var ctx = c.getContext("2d");
-        if (currPressure != parseFloat(e.pressure)) {
-          currPressure = parseFloat(e.pressure);
-          ctx.lineTo(x,y);
+        var cy = getCorrectY(y,c.getAttribute("order"));
+        if (updatePressure) {
+          ctx.lineTo(x,cy);
           ctx.stroke();
           ctx.beginPath();
-          ctx.moveTo(x,y);
+          ctx.moveTo(x,cy);
           ctx.lineWidth = parseFloat(penWidth)+parseFloat((e.pressure-0.5)*25);
         }
         currWidthOverall = ctx.lineWidth;
-        y = getCorrectY(y,c.getAttribute("order"));
-        ctx.lineTo(x,y);
+        ctx.lineTo(x,cy);
         ctx.stroke(); 
       }
     })
