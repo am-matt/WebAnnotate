@@ -261,7 +261,7 @@ function colorPressed(b) {
     updateStatus("newColor",[b.style.backgroundColor]);
 }
 
-menu.addEventListener("mousedown", (e) => {
+menu.addEventListener("pointerdown", (e) => {
     if (e.button != 0) { return; }
     const nodrag = Array.from(document.getElementsByClassName("nodrag"));
     var draggable = true;
@@ -279,13 +279,13 @@ menu.addEventListener("mousedown", (e) => {
     }
 })
 
-menu.addEventListener("mousemove", (e) => {
+menu.addEventListener("pointermove", (e) => {
     if (dragMode) {
         updateStatus("dragToolbox", args=[e.movementX,e.movementY]);
     }
 })
 
-menu.addEventListener("mouseup", (e) => {
+menu.addEventListener("pointerup", (e) => {
     if (dragMode) {
         dragMode = false;
         menu.style.cursor = "default";

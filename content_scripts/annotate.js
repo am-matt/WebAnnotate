@@ -123,6 +123,7 @@ function createCanvases() {
     } else {
       canvasDiv = document.createElement("div");
       canvasDiv.style.width = consWidth + "px";
+      canvasDiv.style.touchAction = "none";
       canvasDiv.style.margin = "auto";
       canvasDiv.id = "webannotate-canvasdiv";
       canvasDiv.style.position = "absolute";
@@ -167,6 +168,7 @@ function loadToolbox() {
 
     const iframe = document.createElement("iframe");
     iframe.id = 'ext-toolbox';
+    iframe.style.touchAction = "none";
     iframe.allowTransparency = true;
     iframe.onload = load;
     iframe.src = browser.extension.getURL("ui/toolbox.html");
@@ -228,9 +230,9 @@ function loadToolbox() {
 
     //document.addEventListener("click", handleClickEvent);
     document.addEventListener("contextmenu", noContext);
-    document.addEventListener("mousemove", handleMouseMoveEvent);
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("pointermove", handleMouseMoveEvent);
+    document.addEventListener("pointerdown", onMouseDown);
+    document.addEventListener("pointerup", onMouseUp);
     window.addEventListener('keydown', keyPressHandler);
 
     window.addEventListener("wheel",(e)=>{
@@ -420,9 +422,14 @@ function onMouseDown(e) {
       ctx.strokeStyle = color;
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
-      ctx.lineWidth = penWidth;
+
+      currPressure = parseFloat(e.pressure);
+      ctx.lineWidth = parseFloat(penWidth)+parseFloat((e.pressure-0.5)*25);
+      currWidthOverall = ctx.lineWidth;
+
       ctx.beginPath();
       ctx.moveTo(getOffsetX(e.pageX), getCorrectY(getOffsetY(e.pageY),c.getAttribute("order")));
+      
     })
   }
 }
@@ -431,9 +438,9 @@ function onMouseUp(e) {
   if ((mode == "draw" || mode == "erase") && e.button == 0) {
     canvasDiv.releasePointerCapture(e.pointerId);
     if (mode == "draw") {
-      draw(getOffsetX(e.pageX),getOffsetY(e.pageY));
+      draw(getOffsetX(e.pageX),getOffsetY(e.pageY),e);
     } else if (mode == "erase") {
-      erase(getOffsetX(e.pageX),getOffsetY(e.pageY));
+      erase(getOffsetX(e.pageX),getOffsetY(e.pageY),e);
     }
     changes = true;
     updateUndoStack();
@@ -450,9 +457,9 @@ function handleMouseMoveEvent(e) {
   document.documentElement.style.transformOrigin = `${e.clientX}px ${e.clientY}px`;
   updateCursor(e);
   if (mode == "draw" && e.buttons == 1) {
-    draw(getOffsetX(e.pageX),getOffsetY(e.pageY));
+    draw(getOffsetX(e.pageX),getOffsetY(e.pageY),e);
   } else if (mode == "erase" && e.buttons == 1) {
-    erase(getOffsetX(e.pageX),getOffsetY(e.pageY));
+    erase(getOffsetX(e.pageX),getOffsetY(e.pageY),e);
   }
 }
 
@@ -479,7 +486,9 @@ function updateStatus(status) {
   }
 }
 
-function draw(x,y) {
+var currPressure = 0.0;
+var currWidthOverall = penWidth;
+function draw(x,y,e) {
   if (canvasDiv && toolbox.style.visibility != "hidden") {
     canvas.forEach((c) => {
       if (isElementInViewport(c)) {
@@ -487,14 +496,24 @@ function draw(x,y) {
           canvasWithChanges.push(c); 
         }
         var ctx = c.getContext("2d");
-        ctx.lineTo(x,getCorrectY(y,c.getAttribute("order")));
+        if (currPressure != parseFloat(e.pressure)) {
+          currPressure = parseFloat(e.pressure);
+          ctx.lineTo(x,y);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x,y);
+          ctx.lineWidth = parseFloat(penWidth)+parseFloat((e.pressure-0.5)*25);
+        }
+        currWidthOverall = ctx.lineWidth;
+        y = getCorrectY(y,c.getAttribute("order"));
+        ctx.lineTo(x,y);
         ctx.stroke(); 
       }
     })
   }
 }
 
-function erase(x,y) {
+function erase(x,y,e) {
   if (canvasDiv && toolbox.style.visibility != "hidden") {
     canvas.forEach((c) => {
       if (isElementInViewport(c)) {
@@ -502,11 +521,13 @@ function erase(x,y) {
           canvasWithChanges.push(c); 
         }
         var ctx = c.getContext("2d");
+        ctx.lineWidth = penWidth;
         ctx.save();
         ctx.globalCompositeOperation = 'destination-out';
         ctx.lineTo(x,getCorrectY(y,c.getAttribute("order")));
+        
         ctx.stroke();
-        ctx.restore()
+        ctx.restore();
       }
     })
   }
@@ -660,6 +681,7 @@ function updateColors(newColors) {
 
 function dragToolbox(x,y) {
   toolbox.style.transition = "none";
+  document.documentElement.style.touchAction = "none";
   toolbox.style.left = parseInt(getComputedStyle(toolbox).left.replace('px','')) + x + 'px';
   toolbox.style.top = parseInt(getComputedStyle(toolbox).top.replace('px','')) + y + 'px';
 }
